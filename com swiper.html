@@ -168,6 +168,8 @@
     /* Estilo para ativar o zoom por mouse (desktop hover) ou touch (mobile class) */
     .slide-zoom:hover img, .slide-zoom.touch-zoom-active img {
       transform: scale(2.2);
+      /* O cursor de toque deve ser 'move' para indicar panning */
+      cursor: move; 
     }
     .slide-zoom {
       cursor: crosshair;
@@ -199,9 +201,10 @@
             </div>
             
             <!-- Slides Horizontal 2, 3, 4: Fotos com zoom lupa -->
-            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1"></div>
-            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2"></div>
-            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3"></div>
+            <!-- ADICIONADO: swiper-no-swiping para desativar o arrasto horizontal do Swiper nesta área -->
+            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1"></div>
+            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2"></div>
+            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3"></div>
             
           </div>
           <!-- Pontinhos (Paginação Horizontal) -->
@@ -240,8 +243,9 @@
           <div class="swiper-wrapper">
             
             <!-- Slides Horizontal: Apenas Imagens para o segundo produto -->
-            <div class="swiper-slide slide-zoom"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
-            <div class="swiper-slide slide-zoom"><img src="https://images.unsplash.com/photo-1605342415174-8d4ed0c5c364?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
+            <!-- ADICIONADO: swiper-no-swiping para desativar o arrasto horizontal do Swiper nesta área -->
+            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
+            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://images.unsplash.com/photo-1605342415174-8d4ed0c5c364?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
             
           </div>
           <!-- Pontinhos (Paginação Horizontal) -->
@@ -320,7 +324,7 @@
       slidesPerView: 1,
       spaceBetween: 0,
       mousewheel: true,
-      keyboard: { enabled: true }, // Teclas UP/DOWN já funcionando
+      keyboard: { enabled: true },
       on: {
         slideChangeTransitionStart: function() {
           if (this.previousIndex === 0) {
@@ -350,7 +354,9 @@
           el: element.querySelector(".swiper-pagination"),
           clickable: true,
         },
-        keyboard: { enabled: true }, // NOVO: Habilita as teclas LEFT/RIGHT
+        keyboard: { enabled: true },
+        // IMPORTANTE: Adiciona o parâmetro noSwipingClass para funcionar com o HTML
+        noSwipingClass: 'swiper-no-swiping', 
         on: {
           slideChange: function() {
             if (verticalSwiper.activeIndex === 0) {
@@ -436,6 +442,8 @@
       // Mobile: Touch Pan (mover o zoom)
       parentSlide.addEventListener('touchmove', (e) => {
           if (parentSlide.classList.contains('touch-zoom-active') && e.touches.length === 1) {
+              // NOVO: Adiciona e.preventDefault() para impedir o scroll padrão do navegador
+              e.preventDefault(); 
               // Crucial: Impede que o Swiper horizontal deslize enquanto o usuário move o zoom
               e.stopPropagation(); 
               
