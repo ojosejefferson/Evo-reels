@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,13 +17,12 @@
       background: #000; 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
       overflow: hidden;
-      /* A centralização é removida do padrão para garantir 100% de tela no mobile */
     }
     
     /* 1. Container principal Swiper vertical (Mobile: 100% tela) */
     .vertical-swiper {
       width: 100%; 
-      height: 100vh; /* 100% da altura da tela, preenche totalmente */
+      height: 100%; /* Usando 100% para melhor compatibilidade mobile */
       max-width: 100%;
       border-radius: 0; 
       box-shadow: none; 
@@ -166,11 +164,17 @@
       transition: transform 0.4s ease;
       transform-origin: center center;
     }
-    /* Estilo para ativar o zoom por mouse (desktop hover) ou touch (mobile class) */
-    .slide-zoom:hover img, .slide-zoom.touch-zoom-active img {
-      transform: scale(2.2);
-      /* O cursor de toque deve ser 'move' para indicar panning */
+    /* Desktop: Zoom ativado por HOVER (só funciona com mouse) */
+    .slide-zoom:hover img {
+        transform: scale(2.2);
+    }
+    /* Mobile: Classe de ativação para Duplo Toque/Pinçar */
+    .slide-zoom.touch-zoom-active img {
       cursor: move; 
+    }
+    /* O scale será definido via JS (inline style) para Pinçar */
+    .slide-zoom.touch-zoom-active-fixed img {
+        transform: scale(2.2); /* Fixed scale for double-tap */
     }
     .slide-zoom {
       cursor: crosshair;
@@ -202,10 +206,9 @@
             </div>
             
             <!-- Slides Horizontal 2, 3, 4: Fotos com zoom lupa -->
-            <!-- ADICIONADO: swiper-no-swiping para desativar o arrasto horizontal do Swiper nesta área -->
-            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1"></div>
-            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2"></div>
-            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3"></div>
+            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1"></div>
+            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2"></div>
+            <div class="swiper-slide slide-zoom"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3"></div>
             
           </div>
           <!-- Pontinhos (Paginação Horizontal) -->
@@ -244,9 +247,8 @@
           <div class="swiper-wrapper">
             
             <!-- Slides Horizontal: Apenas Imagens para o segundo produto -->
-            <!-- ADICIONADO: swiper-no-swiping para desativar o arrasto horizontal do Swiper nesta área -->
-            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
-            <div class="swiper-slide slide-zoom swiper-no-swiping"><img src="https://images.unsplash.com/photo-1605342415174-8d4ed0c5c364?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
+            <div class="swiper-slide slide-zoom"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
+            <div class="swiper-slide slide-zoom"><img src="https://images.unsplash.com/photo-1605342415174-8d4ed0c5c364?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho"></div>
             
           </div>
           <!-- Pontinhos (Paginação Horizontal) -->
@@ -356,8 +358,6 @@
           clickable: true,
         },
         keyboard: { enabled: true },
-        // IMPORTANTE: Adiciona o parâmetro noSwipingClass para funcionar com o HTML
-        noSwipingClass: 'swiper-no-swiping', 
         on: {
           slideChange: function() {
             if (verticalSwiper.activeIndex === 0) {
@@ -367,6 +367,12 @@
               } else {
                 video.pause();
               }
+            }
+            
+            // NOVO: Resetar o zoom ao mudar de slide horizontal (Bug de persistência)
+            const prevSlide = this.slides[this.previousIndex];
+            if (prevSlide && prevSlide.classList.contains('slide-zoom') && (prevSlide.classList.contains('touch-zoom-active-fixed') || prevSlide.classList.contains('touch-zoom-active'))) {
+                 resetZoom(prevSlide); // Desativa o zoom e reseta a escala
             }
           }
         }
@@ -407,63 +413,204 @@
     }
     window.toggleSound = toggleSound;
 
-    // ** 4. Lógica do Zoom de Lupa (Atualizada para Touch) **
-    document.querySelectorAll('.slide-zoom img').forEach(img => {
-      const parentSlide = img.parentElement; // O elemento .swiper-slide
+    // ** 4. Lógica do Zoom (Pinçar e Duplo Toque) **
+    
+    const touchTimestamps = new WeakMap();
+    const doubleTapDelay = 300; 
 
-      // Desktop: Usa mousemove para alterar o ponto de origem no hover (CSS)
-      parentSlide.addEventListener('mousemove', (e) => {
-          if (window.innerWidth >= 450) { // Só ativa no modo desktop
-              const rect = img.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              const xPercent = (x / rect.width) * 100;
-              const yPercent = (y / rect.height) * 100;
-              img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-          }
-      });
+    // Variáveis para Pinçar (Pinch-to-Zoom)
+    let initialPinchDistance = 0;
+    let currentScale = 1;
+    let imgElement = null;
 
-      // Mobile: Touch-to-Zoom (ativar)
-      parentSlide.addEventListener('touchstart', (e) => {
-          if (window.innerWidth < 450 && e.touches.length === 1) {
-              // Ativa o zoom mobile (classe 'touch-zoom-active' no CSS)
-              parentSlide.classList.add('touch-zoom-active'); 
-              
-              // Define o ponto inicial do zoom
-              const touch = e.touches[0];
-              const rect = img.getBoundingClientRect();
-              const x = touch.clientX - rect.left;
-              const y = touch.clientY - rect.top;
-              const xPercent = (x / rect.width) * 100;
-              const yPercent = (y / rect.height) * 100;
-              img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-          }
-      });
+    function getDistance(touch1, touch2) {
+        return Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+    }
+    
+    // Função universal para resetar o zoom (chamada por Duplo Toque OFF ou Slide Change)
+    function resetZoom(parentSlide) {
+        const img = parentSlide.querySelector('img');
+        
+        // Remove todas as classes de zoom
+        parentSlide.classList.remove('touch-zoom-active', 'touch-zoom-active-fixed', 'swiper-no-swiping');
+        
+        // Reseta o estilo inline de transform (para Pinçar)
+        img.style.transform = 'scale(1)'; 
+        
+        // Reseta o ponto de origem e remove listener de pan
+        img.style.transformOrigin = 'center center';
+        parentSlide.removeEventListener('touchmove', handleZoomPan, { passive: false });
+        
+        // Reseta variáveis do pinch
+        currentScale = 1;
+        initialPinchDistance = 0;
+        imgElement = null;
+    }
 
-      // Mobile: Touch Pan (mover o zoom)
-      parentSlide.addEventListener('touchmove', (e) => {
-          if (parentSlide.classList.contains('touch-zoom-active') && e.touches.length === 1) {
-              // NOVO: Adiciona e.preventDefault() para impedir o scroll padrão do navegador
-              e.preventDefault(); 
-              // Crucial: Impede que o Swiper horizontal deslize enquanto o usuário move o zoom
-              e.stopPropagation(); 
-              
-              const touch = e.touches[0];
-              const rect = img.getBoundingClientRect();
-              const x = touch.clientX - rect.left;
-              const y = touch.clientY - rect.top;
-              const xPercent = (x / rect.width) * 100;
-              const yPercent = (y / rect.height) * 100;
-              img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-          }
-      });
+    // Função para Ligar/Desligar o zoom de Duplo Toque (Fixo 2.2x)
+    function toggleZoom(parentSlide) {
+        if (window.innerWidth >= 450) return; 
 
-      // Mobile: Touchend (desativar)
-      parentSlide.addEventListener('touchend', (e) => {
-          // Desativa o zoom e reseta a origem
-          parentSlide.classList.remove('touch-zoom-active');
-          img.style.transformOrigin = 'center center';
-      });
+        const isZoomActive = parentSlide.classList.toggle('touch-zoom-active-fixed');
+        const img = parentSlide.querySelector('img');
+
+        if (isZoomActive) {
+            // ZOOM ON: Desativa o deslize e habilita o Pan (handleZoomPan é o mesmo para toque simples no zoom)
+            parentSlide.classList.add('touch-zoom-active'); // Adiciona a classe genérica
+            parentSlide.classList.add('swiper-no-swiping');
+            parentSlide.addEventListener('touchmove', handleZoomPan, { passive: false });
+            // Aplica a escala fixa
+            img.style.transform = 'scale(2.2)';
+
+        } else {
+            // ZOOM OFF: Reseta completamente
+            resetZoom(parentSlide);
+        }
+    }
+
+    // Função para mover o ponto de origem (pan) no zoom (usado por Duplo Toque)
+    function handleZoomPan(e) {
+        if (e.touches.length !== 1 || (!e.currentTarget.classList.contains('touch-zoom-active-fixed') && !e.currentTarget.classList.contains('touch-zoom-active'))) return;
+
+        e.preventDefault(); 
+        e.stopPropagation();
+
+        const parentSlide = e.currentTarget;
+        const img = parentSlide.querySelector('img');
+        const touch = e.touches[0];
+        const rect = img.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+        
+        // Move o centro da transformação (origem) para a posição do toque
+        img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+    }
+
+
+    document.querySelectorAll('.slide-zoom').forEach(slide => {
+        // ----------------------------------------------------
+        // GESTOS MOBILE (Duplo Toque, Pinçar)
+        // ----------------------------------------------------
+        slide.addEventListener('touchstart', (e) => {
+            if (window.innerWidth >= 450) return; // Ignora Desktop
+
+            if (e.touches.length === 2) {
+                // ** Pinçar (Pinch-to-Zoom) - Início **
+                e.preventDefault();
+                resetZoom(slide); // Desativa zoom de duplo toque se estiver ativo
+                
+                initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+                currentScale = 1; 
+                imgElement = slide.querySelector('img');
+
+                slide.classList.add('touch-zoom-active', 'swiper-no-swiping');
+                
+            } else if (e.touches.length === 1) {
+                // ** Duplo Toque - Detecção **
+                const lastTapTime = touchTimestamps.get(slide) || 0;
+                const currentTime = new Date().getTime();
+
+                if (currentTime - lastTapTime < doubleTapDelay) {
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    
+                    toggleZoom(slide);
+                    touchTimestamps.set(slide, 0); // Reseta o timer
+
+                    // Define o ponto inicial de zoom no centro do toque duplo
+                    const touch = e.touches[0];
+                    const img = slide.querySelector('img');
+                    const rect = img.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    const xPercent = (x / rect.width) * 100;
+                    const yPercent = (y / rect.height) * 100;
+                    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                } else {
+                    touchTimestamps.set(slide, currentTime);
+                }
+            }
+        }, { passive: false }); 
+
+        slide.addEventListener('touchmove', (e) => {
+            if (window.innerWidth >= 450) return; // Ignora Desktop
+
+            if (e.touches.length === 2 && initialPinchDistance > 0) {
+                // ** Pinçar (Pinch-to-Zoom) - Movimento **
+                e.preventDefault(); 
+                e.stopPropagation();
+
+                const newDistance = getDistance(e.touches[0], e.touches[1]);
+                // Calcula a nova escala com um limite de zoom máximo
+                let scaleChange = newDistance / initialPinchDistance;
+                let newScale = Math.max(1, Math.min(scaleChange, 4)); // Escala entre 1x e 4x
+
+                // Aplica a escala e o pan (origem no centro da pinça)
+                if (imgElement) {
+                    imgElement.style.transform = `scale(${newScale})`;
+                    
+                    // Calcula o ponto médio (centro da pinça) para o transformOrigin
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    
+                    const rect = imgElement.getBoundingClientRect();
+                    const x = centerX - rect.left;
+                    const y = centerY - rect.top;
+                    const xPercent = (x / rect.width) * 100;
+                    const yPercent = (y / rect.height) * 100;
+                    imgElement.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                }
+                
+                currentScale = newScale;
+
+            } else if (e.touches.length === 1 && (slide.classList.contains('touch-zoom-active-fixed') || slide.classList.contains('touch-zoom-active'))) {
+                // O pan é tratado pela função handleZoomPan, mas precisa da classe de ativação
+                handleZoomPan(e); 
+            }
+        }, { passive: false });
+
+        slide.addEventListener('touchend', (e) => {
+            if (window.innerWidth >= 450) return; // Ignora Desktop
+
+            // Se a escala for próxima de 1 após o pinçar, reseta completamente
+            if (currentScale < 1.1) {
+                resetZoom(slide);
+            }
+            
+            // Reseta variáveis do pinch (importante para evitar ativação acidental)
+            initialPinchDistance = 0;
+            imgElement = null;
+
+        });
+
+
+        // ----------------------------------------------------
+        // DESKTOP ZOOM (Hover/MouseMove)
+        // ----------------------------------------------------
+        slide.addEventListener('mousemove', (e) => {
+            if (window.innerWidth >= 450) { // SÓ desktop
+                // Aplica o transform-origin baseado na posição do mouse (pan/lupa)
+                const img = e.currentTarget.querySelector('img');
+                const rect = img.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const xPercent = (x / rect.width) * 100;
+                const yPercent = (y / rect.height) * 100;
+                img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+            }
+        });
+
+        slide.addEventListener('mouseleave', (e) => {
+            if (window.innerWidth >= 450) { // SÓ desktop
+                 // Reseta o transform-origin ao sair (o CSS cuida do transform: scale(1))
+                 e.currentTarget.querySelector('img').style.transformOrigin = 'center center';
+            }
+        });
     });
     
     // ** 5. Lógica do Modal **
