@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVO Reels - Carrossel Básico com Destaque Central</title>
+    
+    <!-- Inclui o Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Inclui os estilos do Swiper (versão estável) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.css" />
+    
+    <style>
+        /* Estilos Base e Background */
+        body { 
+            background-color: #111; 
+            color: #fff;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Container Principal */
+        .swiper {
+            width: 100%;
+            padding-top: 60px;
+            padding-bottom: 60px;
+        }
+
+        /* Estilo do Slide - Onde o destaque acontece */
+        .swiper-slide {
+            width: 280px; /* Largura padrão para mobile/destaque */
+            height: 480px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: all 0.3s ease; /* Transição suave para escala/blur */
+            filter: blur(1px); /* Blur para slides não ativos */
+        }
+        
+        .swiper-slide-active {
+            filter: blur(0px); /* Tira o blur do slide ativo */
+        }
+
+        /* Vídeo */
+        .slide-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* Overlay de Conteúdo */
+        .slide-content-overlay {
+            position: relative;
+            z-index: 2; 
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Conteúdo no rodapé */
+            padding: 25px;
+            /* Gradiente na parte inferior para legibilidade */
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+        }
+
+        /* Estilos do Conteúdo */
+        .slide-content-overlay h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+        
+        .slide-content-overlay p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Navegação */
+        .swiper-button-next, .swiper-button-prev {
+            color: white;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .swiper-button-next:hover, .swiper-button-prev:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <section>
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                
+                <!-- Slide 1: Conteúdo para a Esquerda -->
+                <div class="swiper-slide">
+                    <video class="slide-video" autoplay loop muted playsinline poster="https://placehold.co/280x480/2c5364/ffffff?text=VÍDEO+1">
+                        <source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-content-overlay">
+                        <h2>Novidades de Verão</h2>
+                        <p>A nova coleção com frete grátis.</p>
+                    </div>
+                </div>
+                
+                <!-- Slide 2: Conteúdo para a Esquerda -->
+                <div class="swiper-slide">
+                    <video class="slide-video" autoplay loop muted playsinline poster="https://placehold.co/280x480/4f6f89/ffffff?text=VÍDEO+2">
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-showing-new-sneakers-in-a-street-1191-large.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-content-overlay">
+                        <h2>Tênis em Destaque</h2>
+                        <p>Tecnologia e design para o seu dia.</p>
+                    </div>
+                </div>
+                
+                <!-- Slide 3: CENTRAL (Sempre Destaque no Início) -->
+                <div class="swiper-slide">
+                    <video class="slide-video" autoplay loop muted playsinline poster="https://placehold.co/280x480/b45205/ffffff?text=VÍDEO+3">
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-woman-with-a-red-dress-walking-and-posing-19212-large.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-content-overlay">
+                        <h2>Vestido Elegante</h2>
+                        <p>Perfeito para festas e eventos.</p>
+                    </div>
+                </div>
+                
+                <!-- Slide 4: Conteúdo para a Direita -->
+                <div class="swiper-slide">
+                    <video class="slide-video" autoplay loop muted playsinline poster="https://placehold.co/280x480/203a43/ffffff?text=VÍDEO+4">
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-beautiful-woman-is-shopping-at-the-mall-1534-large.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-content-overlay">
+                        <h2>Acessórios Essenciais</h2>
+                        <p>Bolsas, óculos e muito mais.</p>
+                    </div>
+                </div>
+                
+                <!-- Slide 5: Conteúdo para a Direita -->
+                <div class="swiper-slide">
+                    <video class="slide-video" autoplay loop muted playsinline poster="https://placehold.co/280x480/0f2027/ffffff?text=VÍDEO+5">
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-young-woman-in-a-park-with-curly-hair-171-large.mp4" type="video/mp4">
+                    </video>
+                    <div class="slide-content-overlay">
+                        <h2>Última Chance</h2>
+                        <p>Aproveite os descontos da liquidação.</p>
+                    </div>
+                </div>
+
+            </div>
+            <!-- Botões de Navegação -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </section>
+
+    <!-- Inclui o script do Swiper -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.js'></script> 
+    
+    <script>
+        // Inicialização do Swiper com Efeito Coverflow
+        var swiper = new Swiper(".mySwiper", {
+            effect: "coverflow",
+            grabCursor: true,
+            centeredSlides: true,
+            loop: true,
+            spaceBetween: 20,
+            
+            // Inicia no 3º slide (índice 2)
+            initialSlide: 2, 
+            
+            coverflowEffect: {
+                rotate: 0,
+                stretch: 0,
+                depth: 100,
+                modifier: 1.5,
+                slideShadows: false
+            },
+            
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+
+            // BREAKPOINTS para Responsividade
+            breakpoints: {
+                // Configuração Padrão (Mobile First)
+                0: { 
+                    slidesPerView: 1.2, // Slide central grande + prévia
+                    spaceBetween: 10,
+                },
+                // Desktop (a partir de 768px)
+                768: { 
+                    slidesPerView: 3, // 3 slides visíveis (Esquerda, Centro, Direita)
+                    spaceBetween: 30,
+                }
+            },
+            
+            // LÓGICA DE ESCALA CUSTOMIZADA PARA DESTAQUE
+            on: {
+                progress: function () {
+                    for (let i = 0; i < this.slides.length; i++) {
+                        let slide = this.slides[i];
+                        let progress = slide.progress;
+                        
+                        // Fator de escala: Slide central (progress ~ 0) tem scale=1. 
+                        // Slides laterais são reduzidos em 30% para o destaque.
+                        let scale = 1 - Math.min(Math.abs(progress * 0.2), 0.30); 
+
+                        slide.style.transform = 'scale(' + scale + ')';
+
+                        // Ajusta a opacidade para slides mais distantes (e desativa o blur se estiver muito distante)
+                        slide.style.opacity = 1 - Math.min(Math.abs(progress * 0.4), 0.5); 
+                    }
+                },
+                setTransition: function (transition) {
+                    for (let i = 0; i < this.slides.length; i++) {
+                        const slide = this.slides[i];
+                        slide.style.transition = transition + 'ms';
+                    }
+                },
+
+                // Lógica de Play/Pause do Vídeo
+                slideChangeTransitionStart: function () {
+                    // Pausa todos os vídeos
+                    this.slides.forEach(slide => {
+                        const video = slide.querySelector('.slide-video');
+                        if (video) video.pause();
+                    });
+                },
+                slideChangeTransitionEnd: function () {
+                    // Inicia o vídeo do slide ativo
+                    const activeSlide = this.slides[this.activeIndex];
+                    const video = activeSlide.querySelector('.slide-video');
+                    if (video) {
+                        video.currentTime = 0; // Reinicia o vídeo
+                        video.play().catch(e => console.log('Autoplay falhou na transição:', e));
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

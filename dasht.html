@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Evo Reels</title>
+    <!-- Inclui o Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuração de fonte para simular o painel WP */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0; /* Cor de fundo comum em painéis admin */
+        }
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .kpi-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .video-list-row {
+            display: grid;
+            grid-template-columns: 1fr repeat(6, minmax(0, 1fr));
+            gap: 1rem;
+            align-items: center;
+        }
+        .video-row:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+        .video-row:hover {
+            background-color: #f0f9ff;
+        }
+    </style>
+
+    <!-- Função auxiliar para ícones SVG (simulando Lucide/Heroicons) -->
+    <script>
+        function getIcon(name) {
+            const icons = {
+                'mousePointer': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M3 3l7.07 16.97 2.51-7.38 7.38-2.51L3 3z"/></svg>`,
+                'trendingUp': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+                'eye': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
+                'thumbsUp': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M7 10v12c0 1.1.9 2 2 2h8c.55 0 1-.45 1-1l2-7V8h-2c-1.1 0-2-.9-2-2V2c0-1.1-.9-2-2-2H9C7.9 0 7 .9 7 2v8zM19 8h2v2h-2V8z"/></svg>`,
+                'share2': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+                'clock': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+                'percent': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`,
+                'dollarSign': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+                'tag': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12.5 7l.4 5 1.5-3 1.5 3 1.4-5"/></svg>`,
+            };
+            return icons[name] || '';
+        }
+    </script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Evo Reels</h1>
+        <p class="text-gray-600 mb-8">Visão geral do desempenho dos seus Reels e as principais métricas de conversão.</p>
+
+        <!-- Seção de Indicadores Chave (KPIs) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            
+            <!-- KPI 1: CTR (Taxa de Cliques) do Produto -->
+            <div class="kpi-card bg-white p-6 rounded-lg shadow-md border-indigo-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">CTR do Produto</span>
+                    <div class="text-indigo-500" data-icon="mousePointer" title="Taxa de Cliques"></div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-4xl font-bold text-gray-900">8.5<span class="text-2xl">%</span></p>
+                    <p class="text-sm text-green-500 flex items-center mt-1">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                        +1.2% (últimos 7 dias)
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 2: Taxa de Conversão (Reel > Venda) -->
+            <div class="kpi-card bg-white p-6 rounded-lg shadow-md border-green-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Taxa de Conversão</span>
+                    <div class="text-green-500" data-icon="percent" title="Taxa de Conversão"></div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-4xl font-bold text-gray-900">2.1<span class="text-2xl">%</span></p>
+                    <p class="text-sm text-red-500 flex items-center mt-1">
+                        <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
+                        -0.5% (último mês)
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 3: Tempo Médio Assistido -->
+            <div class="kpi-card bg-white p-6 rounded-lg shadow-md border-blue-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Tempo Médio Assistido</span>
+                    <div class="text-blue-500" data-icon="clock" title="Tempo Médio"></div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-4xl font-bold text-gray-900">0:28<span class="text-2xl">s</span></p>
+                    <p class="text-sm text-green-500 flex items-center mt-1">
+                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                        +3s (melhoria)
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 4: Receita Atribuída (Últimas 24h) -->
+            <div class="kpi-card bg-white p-6 rounded-lg shadow-md border-yellow-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Receita Atribuída (24h)</span>
+                    <div class="text-yellow-500" data-icon="dollarSign" title="Receita Atribuída"></div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-4xl font-bold text-gray-900">R$ 1.870</p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Total de Vendas via Reels
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Destaque: Desempenho por Categoria -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-10">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <span class="text-pink-500 mr-2" data-icon="tag"></span>
+                    Desempenho por Categoria
+                </h2>
+                <span class="text-sm font-medium text-pink-500">Ver Todas</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-pink-50 p-4 rounded-lg border-l-4 border-pink-400">
+                    <p class="text-xs uppercase text-gray-500 font-semibold">Categoria Mais Rentável</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">Tênis Lifestyle</h3>
+                    <p class="text-sm text-gray-600 mt-1">R$ 15.000 em vendas atribuídas no mês.</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-400">
+                    <p class="text-xs uppercase text-gray-500 font-semibold">Maior CTR</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">Jaquetas Premium</h3>
+                    <p class="text-sm text-gray-600 mt-1">CTR de 10.1% em 30 dias.</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                    <p class="text-xs uppercase text-gray-500 font-semibold">Maior Engajamento</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mt-1">Acessórios</h3>
+                    <p class="text-sm text-gray-600 mt-1">Média de 45s de tempo assistido.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção: Lista de Todos os Vídeos Vinculados -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Listagem de Vídeos Vinculados</h2>
+            
+            <!-- Cabeçalho da Lista -->
+            <div class="video-list-row text-sm font-medium text-gray-500 border-b pb-2 mb-2">
+                <div>Vídeo / Produto Vinculado</div>
+                <div class="text-right">Total Views</div>
+                <div class="text-right">Views (24h)</div>
+                <div class="text-right">Likes</div>
+                <div class="text-right">Shares</div>
+                <div class="text-right">CTR</div>
+                <div class="text-right">Vendas Atrib.</div>
+            </div>
+
+            <!-- Dados dos Vídeos (Linhas) -->
+            <div id="video-list-body">
+                
+                <!-- Vídeo 1: Jaqueta Premium -->
+                <div class="video-list-row video-row py-3">
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x100/2c5364/ffffff?text=VÍDEO+1" alt="Thumbnail" class="w-10 h-16 object-cover rounded mr-3">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Jaqueta Premium (Inverno)</p>
+                            <p class="text-xs text-indigo-600">ID Produto: #1001</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-medium text-gray-700">12.500</div>
+                    <div class="text-right text-sm text-gray-600">500</div>
+                    <div class="text-right text-sm text-gray-600">800</div>
+                    <div class="text-right text-sm text-gray-600">120</div>
+                    <div class="text-right font-medium text-green-600">9.2%</div>
+                    <div class="text-right font-semibold text-gray-800">R$ 5.890</div>
+                </div>
+
+                <!-- Vídeo 2: Tênis Runner Pro -->
+                <div class="video-list-row video-row py-3">
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x100/4f6f89/ffffff?text=VÍDEO+2" alt="Thumbnail" class="w-10 h-16 object-cover rounded mr-3">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Tênis Runner Pro</p>
+                            <p class="text-xs text-indigo-600">ID Produto: #1005</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-medium text-gray-700">25.100</div>
+                    <div class="text-right text-sm text-gray-600">1.200</div>
+                    <div class="text-right text-sm text-gray-600">1.500</div>
+                    <div class="text-right text-sm text-gray-600">300</div>
+                    <div class="text-right font-medium text-green-600">11.8%</div>
+                    <div class="text-right font-semibold text-gray-800">R$ 9.120</div>
+                </div>
+
+                <!-- Vídeo 3: Vestido de Festa -->
+                <div class="video-list-row video-row py-3">
+                    <div class="flex items-center">
+                        <img src="https://placehold.co/60x100/b45205/ffffff?text=VÍDEO+3" alt="Thumbnail" class="w-10 h-16 object-cover rounded mr-3">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Vestido de Festa (Coleção)</p>
+                            <p class="text-xs text-indigo-600">ID Produto: #1012</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-medium text-gray-700">5.200</div>
+                    <div class="text-right text-sm text-gray-600">150</div>
+                    <div class="text-right text-sm text-gray-600">450</div>
+                    <div class="text-right text-sm text-gray-600">50</div>
+                    <div class="text-right font-medium text-red-600">4.5%</div>
+                    <div class="text-right font-semibold text-gray-800">R$ 2.500</div>
+                </div>
+            </div>
+
+            <!-- Paginação (Mock) -->
+            <div class="mt-6 flex justify-between items-center border-t pt-4">
+                <p class="text-sm text-gray-600">Mostrando 1 a 3 de 15 Vídeos</p>
+                <div>
+                    <button class="px-3 py-1 text-sm text-gray-500 border rounded-l-md hover:bg-gray-100">Anterior</button>
+                    <button class="px-3 py-1 text-sm text-white bg-indigo-600 border border-indigo-600 hover:bg-indigo-700">1</button>
+                    <button class="px-3 py-1 text-sm text-gray-500 border rounded-r-md hover:bg-gray-100">Próxima</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Substitui os placeholders de ícones SVG
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-icon]').forEach(el => {
+                const iconName = el.getAttribute('data-icon');
+                el.innerHTML = getIcon(iconName);
+            });
+        });
+    </script>
+</body>
+</html>
