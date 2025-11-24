@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVO Reels - Template de Anúncio (Ad Break)</title>
+  
+  <!-- Inclui o Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inclui os estilos do Swiper -->
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  
+  <style>
+    /* * CSS Customizado: Necessário para Spinner, Pular Anúncio e Contador Circular */
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    /* Estilos base para garantir 100% de altura/largura em dispositivos móveis */
+    body, html { 
+      height: 100%; 
+      width: 100%;
+      background: #000; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      overflow: hidden;
+    }
+    
+    /* * Spinner */
+    .spinner {
+      border-top-color: #fff;
+      -webkit-animation: spinner 1s linear infinite;
+      animation: spinner 1s linear infinite;
+    }
+    @-webkit-keyframes spinner {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Contador Circular (SVG/CSS) */
+    .countdown-ring-svg {
+        transform: rotate(-90deg); /* Começa de cima */
+    }
+    .ring-progress {
+        stroke-dasharray: 251.2; /* 2 * PI * r (r=40, 2*3.14*40 = 251.2) */
+        stroke-dashoffset: 251.2; 
+        transition: stroke-dashoffset 1s linear; /* Animação suave */
+    }
+
+    /* Estilo do botão Pular Anúncio (Invisível por padrão) */
+    .skip-btn {
+        pointer-events: none; /* Desabilitado antes da hora */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .skip-btn.active {
+        pointer-events: auto; /* Habilitado */
+        opacity: 1;
+    }
+
+    /* Modal (Mantido para compatibilidade, mas não usado neste template) */
+    .modal.bottom-0 { bottom: 0; }
+  </style>
+</head>
+<body class="bg-black text-white">
+
+  <!-- ** Swiper Vertical (Feed) ** -->
+  <div class="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden 
+              md:w-[384px] md:h-[683px] md:rounded-[36px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
+    <div class="swiper-wrapper">
+      
+      <!-- ** Slide Vertical 1: O Reel principal (Apenas para contexto) ** -->
+      <!-- Este slide não é o anúncio, mas é necessário para iniciar o Swiper -->
+      <div class="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-slide-type="content">
+        <div class="w-full h-full bg-indigo-600 flex items-center justify-center">
+            <h2 class="text-3xl font-bold">Conteúdo Anterior</h2>
+        </div>
+      </div>
+      
+      <!-- ** Slide Vertical 2: ANÚNCIO / Ad Break ** -->
+      <div class="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-slide-type="ad" data-ad-duration="30">
+        
+        <div class="evo-reels-ad-player w-full h-full relative">
+              
+          <!-- Indicador de Carregamento -->
+          <div class="loading-indicator absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity duration-300 z-10" id="ad-loading">
+            <div class="spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
+          </div>
+          
+          <!-- VÍDEO DO ANÚNCIO (Com auto-pause após término) -->
+          <video id="evo-ad-video" preload="metadata" playsinline muted class="w-full h-full object-cover">
+            <!-- NOTA: Usando um vídeo longo (30 segundos) para simular o ad break -->
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-beautiful-woman-is-shopping-at-the-mall-1534-large.mp4" type="video/mp4">
+          </video>
+        </div>
+        
+        <!-- OVERLAY DE CONTROLE DO ANÚNCIO (Sempre visível) -->
+        <div class="ad-overlay absolute inset-0 p-5 flex flex-col justify-between text-white pointer-events-none z-20">
+            
+            <!-- TOPO: Título e Contador -->
+            <div class="top-bar flex justify-between items-center w-full pointer-events-auto">
+                
+                <!-- Tag de Anúncio -->
+                <span class="bg-red-600/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                    ANÚNCIO PATROCINADO
+                </span>
+                
+                <!-- Contador de Tempo e Botão Pular -->
+                <div class="flex items-center space-x-3">
+                    
+                    <!-- Contador Circular SVG (80x80px) -->
+                    <div class="relative w-10 h-10 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-full shadow-lg">
+                        <svg class="countdown-ring-svg absolute" width="40" height="40" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="18" fill="none" stroke="rgba(255, 255, 255, 0.3)" stroke-width="4" />
+                            <!-- A progressão acontece nesta linha -->
+                            <circle id="ring-progress" class="ring-progress" cx="40" cy="40" r="18" fill="none" stroke="#fef3c7" stroke-width="4" stroke-linecap="round" />
+                        </svg>
+                        <span id="ad-countdown-text" class="text-sm font-bold z-30">30</span>
+                    </div>
+
+                    <!-- Botão Pular Anúncio -->
+                    <button id="skip-ad-btn" class="skip-btn active bg-white text-black font-bold text-sm px-4 py-2 rounded-full shadow-lg border-none" onclick="skipAd()">
+                        PULAR ANÚNCIO
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Rodapé do Anúncio (Exemplo de CTA) -->
+            <div class="footer pointer-events-auto cursor-pointer flex items-center justify-between z-20">
+                <div class="flex items-center gap-2">
+                    <img src="https://placehold.co/40x40/f97316/ffffff?text=Ad" alt="Anunciante" class="w-10 h-10 rounded-full border-2 border-white">
+                    <div>
+                        <div class="ad-company font-bold text-base">Nome da Marca Patrocinadora</div>
+                        <div class="ad-cta text-sm font-semibold text-white/80">Saiba mais sobre a nova coleção.</div>
+                    </div>
+                </div>
+                <!-- Botão de Ação do Anúncio -->
+                <button class="bg-red-600 text-white font-bold text-xs rounded-lg w-24 h-10 flex items-center justify-center border-none hover:bg-red-700 transition">
+                    VISITAR SITE
+                </button>
+            </div>
+        </div>
+      </div>
+      
+      <!-- ** Slide Vertical 3: Próximo Conteúdo (Após o anúncio) ** -->
+      <div class="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-slide-type="content">
+        <div class="w-full h-full bg-green-600 flex items-center justify-center">
+            <h2 class="text-3xl font-bold">Próximo Conteúdo</h2>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- Inclui o script do Swiper -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  
+  <script>
+    // ** VARIÁVEIS DE ANÚNCIO **
+    const AD_DURATION = 30; // Duração total do anúncio em segundos
+    const SKIP_DELAY = 5; // Tempo em segundos após o qual o botão PULAR aparece
+    
+    let countdownInterval;
+    let currentAdTime = 0;
+    
+    // ** Elementos do Anúncio **
+    const adVideo = document.getElementById('evo-ad-video');
+    const adCountdownText = document.getElementById('ad-countdown-text');
+    const ringProgress = document.getElementById('ring-progress');
+    const skipAdBtn = document.getElementById('skip-ad-btn');
+    const adLoadingIndicator = document.getElementById('ad-loading');
+
+    // ** Lógica do Contador Circular (Círculo de 40px de diâmetro) **
+    const circumference = 2 * Math.PI * 18; // Raio (r) = 18. Circunferência = 113.1
+    // Ajustado para o valor que está no CSS (251.2) que corresponde a r=40 (Diâmetro 80px), 
+    // mas o SVG tem viewBox 80x80 com r=18. Vou usar o r=18 correto para o cálculo:
+    const correctCircumference = 2 * Math.PI * 18; // ~113.1
+
+    // ** Lógica para pular o anúncio e avançar o feed **
+    function skipAd() {
+        clearInterval(countdownInterval);
+        adVideo.pause();
+        console.log("Anúncio Pulado ou Finalizado. Avançando para o próximo slide.");
+        
+        // Simula o avanço para o próximo Reel no feed vertical
+        if (verticalSwiper) {
+            verticalSwiper.slideNext();
+        }
+    }
+    window.skipAd = skipAd; // Expor para o onclick no HTML
+
+    // ** Lógica do Cronômetro **
+    function startAdCountdown() {
+        currentAdTime = 0;
+        
+        // Força a duração do vídeo para simular 30s se o vídeo for mais curto
+        if (adVideo.duration < AD_DURATION) {
+             console.warn(`Duração do vídeo (${adVideo.duration.toFixed(1)}s) menor que a duração do Ad (${AD_DURATION}s). Usando AD_DURATION.`);
+        }
+        
+        // 1. Inicializa o estado visual
+        adCountdownText.textContent = AD_DURATION;
+        ringProgress.style.strokeDasharray = correctCircumference;
+        ringProgress.style.strokeDashoffset = 0; // Preenchimento começa em 0
+        skipAdBtn.classList.remove('active');
+        
+        // 2. Inicia o intervalo de 1 segundo
+        countdownInterval = setInterval(() => {
+            currentAdTime += 1;
+            const remaining = AD_DURATION - currentAdTime;
+            
+            // 3. Atualiza o texto
+            adCountdownText.textContent = remaining > 0 ? remaining : 0;
+            
+            // 4. Atualiza a progressão circular (o offset deve diminuir de 113.1 até 0)
+            const progressRatio = currentAdTime / AD_DURATION; // 0.0 a 1.0
+            const offset = correctCircumference * progressRatio;
+            ringProgress.style.strokeDashoffset = offset;
+            
+            // 5. Verifica se o botão PULAR deve aparecer
+            if (currentAdTime >= SKIP_DELAY && remaining > 0) {
+                 skipAdBtn.classList.add('active');
+                 skipAdBtn.textContent = 'PULAR ANÚNCIO';
+            }
+            
+            // 6. Verifica se o anúncio terminou (Tempo limite ou final do vídeo)
+            if (currentAdTime >= AD_DURATION) {
+                // Para o timer
+                clearInterval(countdownInterval);
+                adVideo.pause(); 
+                
+                // Exibe o botão PULAR/FINALIZAR por 2 segundos antes de avançar
+                skipAdBtn.textContent = 'FINALIZADO';
+                skipAdBtn.classList.add('active');
+                setTimeout(skipAd, 2000); 
+            }
+        }, 1000); // Roda a cada 1 segundo
+        
+        // 7. Garante que o vídeo toque
+        adVideo.play().catch(e => console.log("Vídeo do anúncio não pôde ser reproduzido automaticamente.", e));
+    }
+
+    // ** Lógica de Vídeo e Carregamento **
+    
+    // Ocultar spinner do anúncio ao carregar
+    adVideo.addEventListener('canplaythrough', () => {
+        adLoadingIndicator.classList.add('opacity-0');
+        setTimeout(() => adLoadingIndicator.style.display = 'none', 300);
+    });
+
+    // Se o vídeo terminar antes do contador (vídeo curto, por ex.), avançar.
+    adVideo.addEventListener('ended', () => {
+        if (currentAdTime < AD_DURATION) {
+            console.log("Vídeo do anúncio terminou antes do tempo limite. Avançando.");
+            skipAd();
+        }
+    });
+
+
+    // ** 1. Configuração do Swiper Vertical (Feed) **
+    const verticalSwiper = new Swiper('#evo-reels-vertical-swiper', {
+      direction: 'vertical',
+      slidesPerView: 1,
+      spaceBetween: 0,
+      mousewheel: true,
+      keyboard: { enabled: true },
+      on: {
+        slideChangeTransitionStart: function() {
+            // Pausa o vídeo anterior (se for o anúncio)
+            adVideo.pause();
+            clearInterval(countdownInterval);
+        },
+        slideChangeTransitionEnd: function() {
+          const activeSlide = this.slides[this.activeIndex];
+          const slideType = activeSlide.getAttribute('data-slide-type');
+          
+          if (slideType === 'ad') {
+            // Inicia a lógica do anúncio quando o slide é ativado
+            startAdCountdown();
+          } else {
+            // Se não for anúncio, pausar o vídeo (para economizar recursos)
+            adVideo.pause();
+          }
+        },
+        init: function() {
+            // Inicia o countdown se o primeiro slide for o anúncio (Slide 2 neste mock)
+            if (this.activeIndex === 1) {
+                startAdCountdown();
+            }
+        }
+      }
+    });
+
+    // ** 2. Inicialização **
+    // As outras lógicas de zoom/modal do template original foram removidas, 
+    // pois este é um slide de anúncio focado no vídeo e contador.
+  </script>
+</body>
+</html>
