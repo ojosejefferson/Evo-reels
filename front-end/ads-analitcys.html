@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVO Reels - Gerenciador Unificado de Anúncios</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN (Necessário para os gráficos) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Ícone Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Configuração do Tailwind para o layout SaaS e cores customizadas -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        // Cores de fundo e superfície
+                        'primary-dark': '#0f172a',
+                        'secondary-dark': '#1e293b',
+                        'primary-light': '#f8fafc',
+                        'secondary-light': '#ffffff',
+                        'highlight-bg': '#4f46e5', // Indigo-600 para destaque
+                        'highlight-text': '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Cores base para o painel de administração */
+        :root {
+            --primary-color: #4f46e5; /* Indigo-600 */
+        }
+        
+        /* Estilos base do corpo (serão sobrescritos pelo JS/Tailwind Dark Mode) */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s;
+        }
+
+        /* Estilos dos containers de abas e modal */
+        .container-bg {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .dark .container-bg {
+            background-color: #1e293b; /* secondary-dark */
+            border: 1px solid #334155;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Botão Primário */
+        .btn-primary {
+            background-color: var(--primary-color);
+            transition: background-color 0.15s;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Indigo-700 */
+        }
+        
+        /* Estilo para o modal */
+        .modal-overlay {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Estilo de abas */
+        .tab-button {
+            border-bottom: 3px solid transparent;
+            padding-bottom: 8px;
+            transition: border-color 0.15s;
+        }
+        .tab-button.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* Indicador de Tendência (Claro e Escuro) */
+        .trend-up { color: #10b981; } /* Emerald-500 */
+        .trend-down { color: #ef4444; } /* Red-500 */
+        .dark .trend-up { color: #34d399; }
+        .dark .trend-down { color: #f87171; }
+
+        /* Estilo para Card de Métrica Global (Padrão) */
+        .metric-card {
+            background-color: #ffffff;
+            border: 1px solid #f3f4f6;
+        }
+        .dark .metric-card {
+            background-color: #1e293b; /* secondary-dark */
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body class="p-8 bg-primary-light dark:bg-primary-dark text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- HEADER E CONTROLES DE AÇÃO (AGORA COM FILTROS) -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4 md:mb-0">Gerenciador de Anúncios EVO</h1>
+            
+            <div class="flex flex-wrap items-center gap-4 justify-end">
+                
+                <!-- GRUPO DE FILTRO -->
+                <div id="filterControlGroup" class="flex items-center gap-2 flex-wrap justify-end">
+                    <h3 class="text-base font-semibold text-gray-600 dark:text-gray-400 hidden sm:block whitespace-nowrap">Período: 
+                        <span id="currentPeriod" class="text-indigo-500 font-medium">(Últimos 7 dias)</span>
+                    </h3>
+                    
+                    <select id="timeFilter" onchange="applyAdFilter(this.value)" class="p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-300">
+                        <option value="last_7_days">Últimos 7 dias</option>
+                        <option value="last_30_days">Últimos 30 dias</option>
+                        <option value="this_month">Este Mês</option>
+                        <option value="last_month">Mês Passado</option>
+                        <option value="last_6_months">Últimos 6 Meses</option>
+                        <option value="last_12_months">Últimos 12 Meses</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+
+                    <!-- DATAS CUSTOMIZADAS -->
+                    <div id="customDateRange" class="flex gap-2 hidden items-center">
+                        <input type="date" id="filter-start-date" placeholder="Início" class="p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm transition-colors duration-300 w-32">
+                        <input type="date" id="filter-end-date" placeholder="Fim" class="p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm transition-colors duration-300 w-32">
+                        <button onclick="applyCustomFilter()" class="bg-indigo-500 text-white p-2 rounded-lg text-sm hover:bg-indigo-600 transition duration-150">Aplicar</button>
+                    </div>
+                </div>
+
+                <!-- Botão Dark Mode -->
+                <button id="themeToggle" class="p-2 rounded-full bg-secondary-light dark:bg-secondary-dark shadow-md hover:ring-2 ring-indigo-500 transition-all duration-300" aria-label="Alternar Modo Escuro/Claro">
+                    <i data-lucide="sun" id="sunIcon" class="w-6 h-6 text-yellow-500 hidden"></i>
+                    <i data-lucide="moon" id="moonIcon" class="w-6 h-6 text-gray-300"></i>
+                </button>
+                
+                <!-- Botão Adicionar (Movido para o final) -->
+                <button onclick="openAdModal('add')" class="btn-primary text-white px-6 py-2 rounded-lg font-semibold shadow-md flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    Adicionar Novo Anúncio
+                </button>
+            </div>
+        </header>
+
+        <!-- NAVEGAÇÃO POR ABAS -->
+        <nav class="flex space-x-6 mb-6">
+            <button class="tab-button active text-lg text-gray-500 dark:text-gray-400 hover:text-indigo-600" data-tab="performance" onclick="switchTab('performance')">
+                Performance de Anúncios
+            </button>
+            <button class="tab-button text-lg text-gray-500 dark:text-gray-400 hover:text-indigo-600" data-tab="management" onclick="switchTab('management')">
+                Gerenciamento de Anúncios
+            </button>
+        </nav>
+
+        <!-- CONTEÚDO DA ABA DE PERFORMANCE -->
+        <div id="tab-performance" class="tab-content">
+            <div class="space-y-8">
+                <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">Métricas Gerais de Engajamento</h2>
+                
+                <!-- CARDS GLOBAIS DE PERFORMANCE (REMOVIDAS AS MÉTRICAS FINANCEIRAS) -->
+                <div id="global-metrics-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Cards de Performance serão injetados aqui -->
+                </div>
+
+                <!-- TABELA DE PERFORMANCE DETALHADA POR ANÚNCIO (REMOVIDAS AS COLUNAS FINANCEIRAS) -->
+                <div class="container-bg p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-100">Performance Detalhada por Criativo</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Anúncio</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Impressões</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliques (Total)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">CTR (%)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Conversões</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ad-performance-body" class="bg-white dark:bg-secondary-dark divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Dados detalhados por anúncio serão injetados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO DA ABA DE GERENCIAMENTO (CRUD) -->
+        <div id="tab-management" class="tab-content hidden">
+            <div class="container-bg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-100">Anúncios Cadastrados</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mídia</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Formato</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duração (s)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Frequência (após #)</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ads-list-body" class="bg-white dark:bg-secondary-dark divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Linhas de anúncios serão injetadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <p id="no-ads-message" class="text-center text-gray-500 dark:text-gray-400 mt-4 hidden">Nenhum anúncio cadastrado. Clique em "Adicionar Novo Anúncio" para começar.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL DE ADIÇÃO/EDIÇÃO DE ANÚNCIO (AGORA COM SCROLL INTERNO) -->
+    <div id="ad-modal-overlay" class="modal-overlay fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-secondary-dark w-full max-w-2xl rounded-xl shadow-2xl p-6 transform transition-all duration-300 text-gray-800 dark:text-gray-100 max-h-[90vh] overflow-y-auto">
+            <h2 id="modal-title" class="text-2xl font-bold mb-4 border-b dark:border-gray-700 pb-2">Adicionar Novo Anúncio</h2>
+            
+            <form id="ad-form" onsubmit="event.preventDefault(); saveAd();" class="space-y-6">
+                <input type="hidden" id="ad-id-field">
+
+                <!-- 1. CONFIGURAÇÕES BÁSICAS -->
+                <fieldset class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg space-y-3">
+                    <legend class="text-lg font-semibold text-gray-700 dark:text-gray-100 px-2">Informações Básicas</legend>
+                    
+                    <div>
+                        <label for="ad-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título do Anúncio</label>
+                        <input type="text" id="ad-title" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="ad-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mini Descrição</label>
+                        <textarea id="ad-description" rows="2" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Breve texto que será exibido no rodapé do anúncio.</p>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <label for="ad-thumbnail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL da Miniatura (Capa)</label>
+                            <input type="url" id="ad-thumbnail" placeholder="https://..." required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <button type="button" class="btn-primary text-white px-4 py-2 mt-4 rounded-md text-sm whitespace-nowrap">Upload</button>
+                    </div>
+                </fieldset>
+
+                <!-- 2. CONFIGURAÇÕES DE MÍDIA E FORMATO -->
+                <fieldset class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg space-y-3">
+                    <legend class="text-lg font-semibold text-gray-700 dark:text-gray-100 px-2">Formato e Linkagem</legend>
+
+                    <div>
+                        <label for="ad-format" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de Formato</label>
+                        <select id="ad-format" onchange="toggleFormatFields(this.value)" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="video">Vídeo (MP4/YouTube)</option>
+                            <option value="image">Foto (JPEG/PNG)</option>
+                            <option value="html5">Código HTML5 / AdSense</option>
+                        </select>
+                    </div>
+
+                    <!-- Campos de URL (Vídeo/Foto) -->
+                    <div id="media-url-fields" class="space-y-3">
+                        <label for="ad-media-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">URL da Mídia (Vídeo ou Foto)</label>
+                        <input type="url" id="ad-media-url" placeholder="https://seu-ad.com/video.mp4" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <!-- Campo de Código (HTML5/AdSense) -->
+                    <div id="html5-code-field" class="hidden">
+                        <label for="ad-html5-code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código HTML5 / Script (iframe)</label>
+                        <textarea id="ad-html5-code" rows="4" placeholder="Insira seu código VAST, AdSense ou HTML aqui..." class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 font-mono text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="ad-cta-link" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Link de Visita (CTA)</label>
+                        <input type="url" id="ad-cta-link" placeholder="https://link.do.anunciante.com.br" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </fieldset>
+
+                <!-- 3. AJUSTES DE EXIBIÇÃO -->
+                <fieldset class="border border-gray-200 dark:border-gray-700 p-4 rounded-lg space-y-3">
+                    <legend class="text-lg font-semibold text-gray-700 dark:text-gray-100 px-2">Ajustes de Exibição e Frequência</legend>
+
+                    <!-- NOVOS CAMPOS DE DATA -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="ad-start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Início</label>
+                            <input type="date" id="ad-start-date" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="ad-end-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Término</label>
+                            <input type="date" id="ad-end-date" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="ad-duration" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Duração do Anúncio (segundos)</label>
+                            <input type="number" id="ad-duration" min="5" placeholder="30" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Tempo máximo de exibição e contagem regressiva.</p>
+                        </div>
+                        <div>
+                            <label for="ad-show-after" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mostrar Depois de (# Reels)</label>
+                            <input type="number" id="ad-show-after" min="1" placeholder="5" required class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                            <p class="text-xs text-gray-500 mt-1 dark:text-gray-400">Frequência: Exibir a cada X reels de conteúdo.</p>
+                        </div>
+                    </div>
+                </fieldset>
+                
+                <!-- BOTÕES DE AÇÃO -->
+                <div class="flex justify-end gap-3 pt-4 sticky bottom-0 bg-white dark:bg-secondary-dark border-t dark:border-gray-700 pt-3">
+                    <button type="button" onclick="closeAdModal()" class="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-100 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancelar</button>
+                    <button type="submit" id="save-ad-button" class="btn-primary text-white px-6 py-2 rounded-lg font-semibold">Salvar Anúncio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        lucide.createIcons();
+        let miniChartInstances = [];
+
+        // ------------------------------------------
+        // LÓGICA DO MODO CLARO/ESCURO
+        // ------------------------------------------
+
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const htmlElement = document.documentElement;
+
+        function updateIcons(isDark) {
+            if (isDark) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        const isDarkPreferred = localStorage.getItem('theme') === 'dark' || 
+                                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        if (isDarkPreferred) {
+            htmlElement.classList.add('dark');
+            updateIcons(true);
+        } else {
+            htmlElement.classList.remove('dark');
+            updateIcons(false);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                updateIcons(false);
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                updateIcons(true);
+            }
+            renderGlobalMetrics(); 
+        });
+
+
+        // ------------------------------------------
+        // DADOS MOCKADOS (Simulando a base de dados)
+        // ------------------------------------------
+        let adsList = [
+            // ADICIONADAS AS DATAS DE INÍCIO E FIM
+            { id: 1, title: 'Nova Coleção Outono (Vídeo)', description: 'Campanha de lançamento para o outono.', thumbnail: 'https://placehold.co/40x40/4f46e5/ffffff?text=V', format: 'video', media_url: 'https://video.ad.com/outono.mp4', cta_link: 'https://marca.com/outono', duration: 30, show_after_reels: 5, start_date: '2025-10-01', end_date: '2025-12-31' },
+            { id: 2, title: 'AdSense Banner Vertical', description: 'Slot de anúncios programáticos.', thumbnail: 'https://placehold.co/40x40/ef4444/ffffff?text=H', format: 'html5', html5_code: '<iframe src="/ad-slot-123">...</iframe>', cta_link: 'https://adsense.com', duration: 15, show_after_reels: 10, start_date: '2025-09-01', end_date: '2025-11-15' },
+            { id: 3, title: 'Promoção de Verão (Foto)', description: 'Biquinis e óculos com 50% off.', thumbnail: 'https://placehold.co/40x40/10b981/ffffff?text=F', format: 'image', media_url: 'https://imagem.ad.com/verao.jpg', cta_link: 'https://marca.com/verao', duration: 10, show_after_reels: 3, start_date: '2025-11-20', end_date: '2026-01-30' }
+        ];
+
+        // DADOS MOCKADOS DE PERFORMANCE
+        let mockAdPerformance = [
+            { id: 1, impressions: 45000, clicks: 3825, conversions: 125, trend_clicks: 15.2, trend_revenue: 25.0, trend_conv: 10.0 },
+            { id: 2, impressions: 22000, clicks: 1320, conversions: 55, trend_clicks: -3.1, trend_revenue: -5.0, trend_conv: -2.0 },
+            { id: 3, impressions: 31000, clicks: 3255, conversions: 80, trend_clicks: 5.5, trend_revenue: 10.0, trend_conv: 5.0 }
+        ];
+        
+        // Mapeamento de Títulos para a Tabela de Performance
+        const adTitles = adsList.reduce((map, ad) => {
+            map[ad.id] = ad.title;
+            return map;
+        }, {});
+
+        let nextAdId = 4;
+
+        // ------------------------------------------
+        // FUNÇÕES DE FILTRO DE DATA
+        // ------------------------------------------
+
+        function applyCustomFilter() {
+            const startDate = document.getElementById('filter-start-date').value;
+            const endDate = document.getElementById('filter-end-date').value;
+            
+            if (startDate && endDate) {
+                document.getElementById('currentPeriod').textContent = `(De ${startDate} até ${endDate})`;
+                // Simulação: Recarrega as métricas
+                renderGlobalMetrics();
+                renderAdPerformanceTable();
+            }
+        }
+        window.applyCustomFilter = applyCustomFilter;
+
+        /**
+         * Aplica o filtro de período selecionado e re-renderiza o Dashboard.
+         */
+        const applyAdFilter = (filterKey) => {
+            const timeFilterSelect = document.getElementById('timeFilter');
+            const periodLabel = timeFilterSelect.options[timeFilterSelect.selectedIndex].text;
+            
+            document.getElementById('currentPeriod').textContent = `(${periodLabel})`;
+            
+            // Simulação de exibição/ocultação do filtro customizado
+            const customRange = document.getElementById('customDateRange');
+            if (filterKey === 'custom') {
+                customRange.classList.remove('hidden');
+                customRange.classList.add('flex');
+            } else {
+                customRange.classList.add('hidden');
+                customRange.classList.remove('flex');
+            }
+
+            // Recarrega as métricas (simulação)
+            renderGlobalMetrics();
+            renderAdPerformanceTable();
+        };
+        window.applyAdFilter = applyAdFilter;
+        
+        // ------------------------------------------
+        // FUNÇÕES DE ANALYTICS (DASHBOARD)
+        // ------------------------------------------
+        
+        const formatNumber = (value) => {
+             return new Intl.NumberFormat('pt-BR').format(value);
+        };
+        const formatPercentage = (value) => {
+             return `${value.toFixed(2)}%`;
+        };
+
+        const calculateGlobalMetrics = () => {
+            let totalImpressions = 0;
+            let totalClicks = 0;
+            let totalConversions = 0;
+
+            mockAdPerformance.forEach(ad => {
+                totalImpressions += ad.impressions;
+                totalClicks += ad.clicks;
+                totalConversions += ad.conversions;
+            });
+            
+            const totalCTR = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+
+            // Retorna apenas métricas de engajamento e contagem de conversão (SEM RECEITA/CR%)
+            return [
+                { title: "Total de Impressões", value: totalImpressions, format: 'number', icon: 'eye', trend: { change: 12.5, direction: 1 } },
+                { title: "Total de Cliques", value: totalClicks, format: 'number', icon: 'mouse-pointer', trend: { change: 18.0, direction: 1 } },
+                { title: "Taxa de Cliques (CTR)", value: totalCTR, format: 'percentage', icon: 'zap', trend: { change: -2.5, direction: -1 } },
+                { title: "Total de Conversões", value: totalConversions, format: 'number', icon: 'check-circle', trend: { change: 5.1, direction: 1 } },
+            ];
+        };
+
+        const renderTrend = (trend) => {
+            if (!trend || trend.change === 0) return '';
+            
+            const trendIcon = trend.direction === 1 ? 'trending-up' : 'trending-down';
+            const trendClass = trend.direction === 1 ? 'trend-up' : 'trend-down';
+            
+            return `
+                <div class="flex items-center space-x-1 ml-3">
+                    <i data-lucide="${trendIcon}" class="w-4 h-4 ${trendClass}"></i>
+                    <span class="text-sm font-bold ${trendClass}">${trend.change.toFixed(1)}%</span>
+                </div>
+            `;
+        };
+        
+        const renderMetricCard = (metric) => {
+            let formattedValue = metric.format === 'percentage' ? formatPercentage(metric.value) : formatNumber(metric.value);
+            const cardId = `miniChart-${metric.title.replace(/\s/g, '')}`;
+            
+            let miniChartData = [Math.random() * 100, Math.random() * 100, Math.random() * 100, Math.random() * 100, Math.random() * 100, Math.random() * 100, Math.random() * 100];
+
+            const isDarkMode = htmlElement.classList.contains('dark');
+            const valueClasses = isDarkMode ? 'text-white' : 'text-gray-900';
+            const titleClasses = isDarkMode ? 'text-gray-400' : 'text-gray-500';
+            const iconClasses = 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300';
+
+
+            return `
+                <div class="p-5 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 metric-card flex flex-col justify-between hover:shadow-lg transition duration-300 h-full">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium ${titleClasses}">${metric.title}</p>
+                            <div class="flex-shrink-0 p-2 rounded-full ${iconClasses}">
+                                <i data-lucide="${metric.icon}" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center mt-1">
+                            <p class="text-2xl font-bold ${valueClasses}">${formattedValue}</p>
+                            ${renderTrend(metric.trend)}
+                        </div>
+                    </div>
+                    
+                    <!-- Placeholder do Mini-Gráfico -->
+                    <div class="w-full h-16 mt-3">
+                        <canvas id="${cardId}" data-chart-data="${miniChartData.join(',')}"></canvas>
+                    </div>
+                </div>
+            `;
+        };
+
+
+        function initializeMiniChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const isDarkMode = htmlElement.classList.contains('dark');
+            
+            const color = isDarkMode ? '#6366f1' : '#4f46e5'; 
+            const backgroundColor = isDarkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.1)';
+            
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(data.length).fill(''),
+                    datasets: [{
+                        data: data,
+                        borderColor: color,
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: backgroundColor,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    layout: { padding: 0 }
+                }
+            });
+        }
+
+
+        function renderGlobalMetrics() {
+            const container = document.getElementById('global-metrics-container');
+            
+            miniChartInstances.forEach(chart => chart.destroy());
+            miniChartInstances = [];
+
+            const metrics = calculateGlobalMetrics();
+            let html = '';
+
+            metrics.forEach(metric => {
+                html += renderMetricCard(metric);
+            });
+
+            container.innerHTML = html;
+            
+            lucide.createIcons();
+
+            document.querySelectorAll('canvas[id^="miniChart-"]').forEach(canvas => {
+                const data = canvas.dataset.chartData.split(',').map(Number);
+                const chart = initializeMiniChart(canvas.id, data);
+                miniChartInstances.push(chart);
+            });
+        }
+
+        function renderAdPerformanceTable() {
+            const tbody = document.getElementById('ad-performance-body');
+            tbody.innerHTML = '';
+            
+            mockAdPerformance.forEach(ad => {
+                const title = adTitles[ad.id] || `Anúncio ID ${ad.id}`;
+                const ctr = ad.impressions > 0 ? (ad.clicks / ad.impressions) * 100 : 0;
+                
+                const trendClassClicks = ad.trend_clicks >= 0 ? 'trend-up' : 'trend-down';
+                const trendClassConv = ad.trend_conv >= 0 ? 'trend-up' : 'trend-down';
+
+                const row = `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${title}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${formatNumber(ad.impressions)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                            <div class="flex items-center">
+                                ${formatNumber(ad.clicks)}
+                                <span class="text-xs ml-2 ${trendClassClicks}">(${ad.trend_clicks.toFixed(1)}%)</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600 dark:text-indigo-400">${ctr.toFixed(2)}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-100">
+                            <div class="flex items-center">
+                                ${formatNumber(ad.conversions)}
+                                <span class="text-xs ml-2 ${trendClassConv}">(${ad.trend_conv.toFixed(1)}%)</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button onclick="openAdModal('edit', ${ad.id})" class="text-indigo-600 hover:text-indigo-900 mx-2 transition">
+                                <i data-lucide="pencil" class="w-4 h-4 inline-block"></i> Editar
+                            </button>
+                            <button onclick="deleteAd(${ad.id})" class="text-red-600 hover:text-red-900 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4 inline-block"></i> Excluir
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+
+        // ------------------------------------------
+        // FUNÇÕES DE GERENCIAMENTO (CRUD)
+        // ------------------------------------------
+
+        function renderAdsList() {
+            const tbody = document.getElementById('ads-list-body');
+            const noAdsMessage = document.getElementById('no-ads-message');
+            tbody.innerHTML = '';
+
+            if (adsList.length === 0) {
+                noAdsMessage.classList.remove('hidden');
+                return;
+            }
+            noAdsMessage.classList.add('hidden');
+
+            adsList.forEach(ad => {
+                const formatLabel = {
+                    'video': 'Vídeo', 'image': 'Foto', 'html5': 'HTML5 / AdSense'
+                }[ad.format] || 'Desconhecido';
+                
+                const formatColor = {
+                    'video': 'bg-blue-100 text-blue-800', 'image': 'bg-green-100 text-green-800', 'html5': 'bg-yellow-100 text-yellow-800'
+                }[ad.format] || 'bg-gray-100 text-gray-800';
+
+                const row = `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <img src="${ad.thumbnail}" alt="Thumb" class="w-10 h-10 rounded-lg object-cover">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${ad.title}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${formatColor}">
+                                ${formatLabel}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${ad.duration}s</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${ad.show_after_reels} reels</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button onclick="openAdModal('edit', ${ad.id})" class="text-indigo-600 hover:text-indigo-900 mx-2 transition">
+                                <i data-lucide="pencil" class="w-4 h-4 inline-block"></i> Editar
+                            </button>
+                            <button onclick="deleteAd(${ad.id})" class="text-red-600 hover:text-red-900 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4 inline-block"></i> Excluir
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            lucide.createIcons();
+        }
+
+        function toggleFormatFields(format) {
+            const mediaUrlFields = document.getElementById('media-url-fields');
+            const html5CodeField = document.getElementById('html5-code-field');
+            const adMediaUrl = document.getElementById('ad-media-url');
+            const adHtml5Code = document.getElementById('ad-html5-code');
+
+            adMediaUrl.required = false;
+            adHtml5Code.required = false;
+
+            if (format === 'video' || format === 'image') {
+                mediaUrlFields.classList.remove('hidden');
+                html5CodeField.classList.add('hidden');
+                adMediaUrl.required = true;
+            } else if (format === 'html5') {
+                mediaUrlFields.classList.add('hidden');
+                html5CodeField.classList.remove('hidden');
+                adHtml5Code.required = true;
+            }
+        }
+
+        function openAdModal(mode, id = null) {
+            const modal = document.getElementById('ad-modal-overlay');
+            const form = document.getElementById('ad-form');
+            form.reset(); 
+            
+            document.getElementById('modal-title').textContent = mode === 'add' ? 'Adicionar Novo Anúncio' : 'Editar Anúncio';
+            document.getElementById('save-ad-button').textContent = mode === 'add' ? 'Salvar Anúncio' : 'Atualizar Anúncio';
+            
+            if (mode === 'edit') {
+                const ad = adsList.find(a => a.id === id);
+                if (!ad) return;
+
+                document.getElementById('ad-id-field').value = ad.id;
+                document.getElementById('ad-title').value = ad.title;
+                document.getElementById('ad-description').value = ad.description;
+                document.getElementById('ad-thumbnail').value = ad.thumbnail;
+                document.getElementById('ad-format').value = ad.format;
+                document.getElementById('ad-cta-link').value = ad.cta_link;
+                document.getElementById('ad-duration').value = ad.duration;
+                document.getElementById('ad-show-after').value = ad.show_after_reels;
+                
+                // NOVOS CAMPOS DE DATA
+                document.getElementById('ad-start-date').value = ad.start_date || '';
+                document.getElementById('ad-end-date').value = ad.end_date || '';
+
+                if (ad.format === 'html5') {
+                    document.getElementById('ad-html5-code').value = ad.html5_code;
+                } else {
+                    document.getElementById('ad-media-url').value = ad.media_url;
+                }
+            } else {
+                document.getElementById('ad-id-field').value = '';
+            }
+            
+            toggleFormatFields(document.getElementById('ad-format').value);
+            modal.classList.add('active');
+        }
+        window.openAdModal = openAdModal;
+
+        function closeAdModal() {
+            document.getElementById('ad-modal-overlay').classList.remove('active');
+        }
+
+        function saveAd() {
+            const id = document.getElementById('ad-id-field').value;
+            const format = document.getElementById('ad-format').value;
+            
+            const newAd = {
+                id: id ? parseInt(id) : nextAdId,
+                title: document.getElementById('ad-title').value,
+                description: document.getElementById('ad-description').value,
+                thumbnail: document.getElementById('ad-thumbnail').value,
+                format: format,
+                cta_link: document.getElementById('ad-cta-link').value,
+                duration: parseInt(document.getElementById('ad-duration').value),
+                show_after_reels: parseInt(document.getElementById('ad-show-after').value),
+                // NOVOS CAMPOS DE DATA
+                start_date: document.getElementById('ad-start-date').value,
+                end_date: document.getElementById('ad-end-date').value,
+            };
+
+            if (format === 'html5') {
+                newAd.html5_code = document.getElementById('ad-html5-code').value;
+                newAd.media_url = ''; 
+            } else {
+                newAd.media_url = document.getElementById('ad-media-url').value;
+                newAd.html5_code = ''; 
+            }
+
+            if (id) {
+                const index = adsList.findIndex(a => a.id === parseInt(id));
+                if (index !== -1) {
+                    adsList[index] = newAd;
+                }
+            } else {
+                adsList.push(newAd);
+                nextAdId++;
+            }
+
+            closeAdModal();
+            renderAdsList();
+            renderGlobalMetrics(); 
+            renderAdPerformanceTable(); 
+        }
+
+        function deleteAd(id) {
+            if (confirm(`Tem certeza de que deseja excluir o anúncio ID ${id}? Esta ação é irreversível.`)) {
+                adsList = adsList.filter(ad => ad.id !== id);
+                
+                // Simulação de remoção de performance
+                mockAdPerformance = mockAdPerformance.filter(ad => ad.id !== id);
+                
+                renderAdsList();
+                renderGlobalMetrics(); 
+                renderAdPerformanceTable(); 
+            }
+        }
+        window.deleteAd = deleteAd;
+        
+        // ------------------------------------------
+        // LÓGICA DE ABAS
+        // ------------------------------------------
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add('active');
+            
+            lucide.createIcons();
+        }
+        window.switchTab = switchTab;
+
+        // ------------------------------------------
+        // INICIALIZAÇÃO
+        // ------------------------------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa o modo escuro/claro e o Chart.js
+            updateIcons(htmlElement.classList.contains('dark'));
+            
+            // Define o filtro inicial
+            document.getElementById('timeFilter').value = 'last_7_days';
+            applyAdFilter('last_7_days');
+
+            renderAdsList();
+            // A renderização das métricas é chamada dentro de applyAdFilter
+        });
+        
+    </script>
+</body>
+</html>
