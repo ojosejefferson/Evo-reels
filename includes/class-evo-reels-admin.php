@@ -31,6 +31,12 @@ class Evo_Reels_Admin {
         add_submenu_page( 'evo-reels', 'Dashboard Produtos', 'Dashboard Produtos', 'manage_options', $this->pages['products'], array( $this, 'render_product_dashboard' ) );
         add_submenu_page( 'evo-reels', 'Dashboard Ads', 'Dashboard Ads', 'manage_options', $this->pages['ads'], array( $this, 'render_ads_dashboard' ) );
         add_submenu_page( 'evo-reels', 'Ajustes', 'Ajustes', 'manage_options', $this->pages['settings'], array( $this, 'render_settings_page' ) );
+
+        // Remove the automatic duplicate top-level submenu entry that matches the main menu label
+        // (WordPress adds a submenu item that points to the top-level page; remove it to avoid duplication)
+        if ( function_exists( 'remove_submenu_page' ) ) {
+            remove_submenu_page( 'evo-reels', 'evo-reels' );
+        }
     }
 
     public function enqueue_admin_assets( $hook ) {
