@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -18,6 +19,66 @@ const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
         y: window.innerHeight - rect.height - 24,
       });
     }
+
+    // Força z-index baixo em TODOS os elementos do WordPress quando miniplayer está visível
+    const style = document.createElement('style');
+    style.id = 'evo-reels-miniplayer-styles';
+    style.textContent = `
+      /* Forçar TODOS os elementos do WordPress a ficarem abaixo do miniplayer */
+      header,
+      footer,
+      .site-header,
+      .site-footer,
+      #header,
+      #footer,
+      .header,
+      .footer,
+      .main-header,
+      .main-footer,
+      nav,
+      .navbar,
+      .main-navigation,
+      .site-navigation,
+      .wp-block-group,
+      .wp-block-columns,
+      .wp-block-template-part,
+      .elementor-element,
+      .elementor-widget,
+      .elementor-section,
+      .woocommerce,
+      .wc-block-components-notice-banner,
+      .wp-block-cover,
+      .wp-block-group__inner-container,
+      .site-main,
+      .content-area,
+      .main-content,
+      article,
+      section,
+      div[class*="header"],
+      div[class*="footer"],
+      div[class*="Header"],
+      div[class*="Footer"],
+      *[class*="sticky"],
+      *[class*="fixed"][class*="top"],
+      *[class*="fixed"][class*="bottom"] {
+        z-index: 1 !important;
+        position: relative !important;
+      }
+      
+      /* Exceção: apenas o miniplayer e modal podem ter z-index alto */
+      .evo-circle-player {
+        z-index: 2147483647 !important;
+        position: fixed !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      const styleElement = document.getElementById('evo-reels-miniplayer-styles');
+      if (styleElement) {
+        styleElement.remove();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -99,20 +160,20 @@ const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
   if (!isVisible) return null;
 
   const style = {
-    left: position.x !== null ? `${position.x}px` : 'auto',
-    top: position.y !== null ? `${position.y}px` : 'auto',
-    right: position.x !== null ? 'auto' : '24px',
-    bottom: position.y !== null ? 'auto' : '24px',
+    left: position.x !== null ? `${position.x}px` : undefined,
+    top: position.y !== null ? `${position.y}px` : undefined,
+    right: position.x !== null ? undefined : '24px',
+    bottom: position.y !== null ? undefined : '24px',
+    zIndex: 2147483647, // Valor máximo do z-index (2^31 - 1)
+    position: 'fixed',
+    pointerEvents: 'auto',
   };
 
-  return (
+  const miniplayerContent = (
     <div
       ref={playerRef}
-      className="evo-circle-player fixed w-[100px] h-[100px] z-[9999] cursor-grab rounded-full overflow-hidden shadow-2xl border-4 border-transparent transition-all duration-300 hover:scale-110"
-      style={{
-        ...style,
-        background: 'linear-gradient(white, white) padding-box, conic-gradient(from 0deg, #ff00c3, #ff6bff, #00f2ff, #00ff9d, #ff00c3) border-box',
-      }}
+      className="evo-circle-player"
+      style={style}
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -127,10 +188,9 @@ const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
         loop
         playsInline
         muted
-        className="w-full h-full object-cover rounded-full"
       />
       <button
-        className="evo-circle-close absolute top-1 right-1 w-[26px] h-[26px] bg-black/75 text-white border-none rounded-full font-bold text-sm cursor-pointer flex items-center justify-center backdrop-blur-sm shadow-lg hover:bg-red-600/90 hover:scale-110 transition-all z-10"
+        className="evo-circle-close"
         onClick={(e) => {
           e.stopPropagation();
           handleClose();
@@ -140,6 +200,12 @@ const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
       </button>
     </div>
   );
+
+  // Renderiza usando Portal diretamente no body para garantir z-index alto
+  if (typeof document !== 'undefined' && document.body) {
+    return createPortal(miniplayerContent, document.body);
+  }
+  return null;
 };
 
 export default Miniplayer;

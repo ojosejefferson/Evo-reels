@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Keyboard, Mousewheel } from 'swiper/modules';
 import 'swiper/css';
@@ -42,12 +43,48 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
     }
     
     // Previne scroll do body quando modal está aberto
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
     document.body.style.overflow = 'hidden';
+    
+    // Calcula scrollbar width e adiciona padding para evitar layout shift
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    
+    // Força z-index baixo no footer do WordPress quando modal está aberto
+    const style = document.createElement('style');
+    style.id = 'evo-reels-modal-footer-styles';
+    style.textContent = `
+      body.evo-reels-modal-open footer,
+      body.evo-reels-modal-open .site-footer,
+      body.evo-reels-modal-open #footer,
+      body.evo-reels-modal-open .footer,
+      body.evo-reels-modal-open .main-footer,
+      body.evo-reels-modal-open .wp-block-template-part[data-area="footer"],
+      body.evo-reels-modal-open header,
+      body.evo-reels-modal-open .site-header,
+      body.evo-reels-modal-open #header,
+      body.evo-reels-modal-open .header,
+      body.evo-reels-modal-open .main-header {
+        z-index: 1 !important;
+        position: relative !important;
+      }
+    `;
+    document.head.appendChild(style);
+    document.body.classList.add('evo-reels-modal-open');
     
     return () => {
       clearTimeout(timer);
       window.removeEventListener('resize', checkMobile);
-      document.body.style.overflow = '';
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+      document.body.classList.remove('evo-reels-modal-open');
+      const styleElement = document.getElementById('evo-reels-modal-footer-styles');
+      if (styleElement) {
+        styleElement.remove();
+      }
     };
   }, []);
 
@@ -178,13 +215,23 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
     console.log('ProductModal - Preço:', productData?.formatted_price || productData?.price);
   }, [productData, images]);
 
-  return (
+      const modalContent = (
     <div 
       ref={modalRef}
-      className="fixed inset-0 bg-black/80 z-[10000] flex items-center justify-center p-0 backdrop-blur-sm overflow-hidden"
+      className="fixed inset-0 bg-black/80 flex items-center justify-center p-0 backdrop-blur-sm overflow-hidden"
       style={{
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 0.3s ease-in-out',
+        zIndex: 2147483646, // Um abaixo do miniplayer, mas ainda extremamente alto
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        padding: 0,
       }}
       onClick={(e) => {
         if (e.target === modalRef.current) {
@@ -193,20 +240,33 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
       }}
     >
       <button
-        className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 md:w-14 md:h-14 bg-white/18 text-white border-none rounded-full text-2xl md:text-3xl font-bold cursor-pointer backdrop-blur-md transition-all hover:bg-white/30 hover:scale-110 hover:rotate-90 z-50"
+        className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 md:w-14 md:h-14 bg-white/18 text-white border-none rounded-full text-2xl md:text-3xl font-bold cursor-pointer backdrop-blur-md transition-all hover:bg-white/30 hover:scale-110 hover:rotate-90"
+        style={{ zIndex: 2147483647 }}
         onClick={onClose}
       >
         ×
       </button>
 
       <div 
-        className={`w-full h-full ${isMobile ? '' : 'md:flex md:flex-row md:justify-center md:items-center md:gap-0 md:h-[683px] md:max-h-[90vh] md:w-[784px] md:max-w-[95vw] md:absolute md:top-1/2 md:left-1/2'}`}
+        className={`${isMobile ? 'w-screen h-screen' : 'w-full h-full md:flex md:flex-row md:justify-center md:items-center md:gap-0 md:h-[683px] md:max-h-[90vh] md:w-[784px] md:max-w-[95vw]'}`}
         style={{
           transform: isVisible 
             ? (isMobile ? 'scale(1)' : 'translate(-50%, -50%) scale(1)')
             : (isMobile ? 'scale(0.95)' : 'translate(-50%, -50%) scale(0.95)'),
           opacity: isVisible ? 1 : 0,
           transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+          zIndex: 2147483646,
+          position: isMobile ? 'fixed' : 'absolute',
+          top: isMobile ? '0' : '50%',
+          left: isMobile ? '0' : '50%',
+          right: isMobile ? '0' : 'auto',
+          bottom: isMobile ? '0' : 'auto',
+          width: isMobile ? '100vw' : 'auto',
+          height: isMobile ? '100vh' : 'auto',
+          maxWidth: isMobile ? '100vw' : 'none',
+          maxHeight: isMobile ? '100vh' : 'none',
+          margin: 0,
+          padding: 0,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -453,8 +513,21 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
       {/* Modal Mobile de Detalhes */}
       <div 
         id="evo-reels-mobile-modal"
-        className="fixed left-0 w-full h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[10001] overflow-y-auto"
-        style={{ bottom: '-100%' }}
+        className="fixed left-0 w-full bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl overflow-y-auto"
+        style={{ 
+          bottom: '-100%',
+          height: '100vh',
+          maxHeight: '100vh',
+          zIndex: 2147483647,
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          left: 0,
+          width: '100vw',
+          maxWidth: '100vw',
+          margin: 0,
+          padding: '20px',
+        }}
       >
         <div className="flex justify-between items-center pb-2">
           <button 
@@ -535,6 +608,12 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
       </div>
     </div>
   );
+
+  // Renderiza usando Portal diretamente no body para garantir z-index alto
+  if (typeof document !== 'undefined' && document.body) {
+    return createPortal(modalContent, document.body);
+  }
+  return null;
 };
 
 export default ProductModal;
