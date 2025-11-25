@@ -223,9 +223,12 @@ class Evo_Reels {
             return '';
         }
         
-        // Formata preço
+        // Preços
+        $regular_price = $product->get_regular_price();
+        $sale_price = $product->get_sale_price();
         $price = $product->get_price();
         $formatted_price = wc_price($price);
+        $formatted_regular_price = $regular_price ? wc_price($regular_price) : '';
         
         // Status de estoque
         $stock_status = $product->get_stock_status();
@@ -244,13 +247,18 @@ class Evo_Reels {
             'id' => $product->get_id(),
             'title' => $product->get_name(),
             'price' => $price,
+            'regular_price' => $regular_price,
+            'sale_price' => $sale_price,
             'formatted_price' => strip_tags($formatted_price),
+            'formatted_regular_price' => $formatted_regular_price ? strip_tags($formatted_regular_price) : '',
+            'on_sale' => $product->is_on_sale(),
             'description' => wp_strip_all_tags($product->get_description()),
             'short_description' => wp_strip_all_tags($product->get_short_description()),
             'stock_status' => $stock_status,
             'stock_text' => $stock_text,
             'sku' => $product->get_sku(),
             'permalink' => get_permalink($product->get_id()),
+            'add_to_cart_url' => $product->add_to_cart_url(),
             'images' => array(),
         );
         
@@ -302,9 +310,12 @@ class Evo_Reels {
             if ($video_url) {
                 $product = wc_get_product($product_id);
                 if ($product) {
-                    // Formata preço
+                    // Preços
+                    $regular_price = $product->get_regular_price();
+                    $sale_price = $product->get_sale_price();
                     $price = $product->get_price();
                     $formatted_price = wc_price($price);
+                    $formatted_regular_price = $regular_price ? wc_price($regular_price) : '';
                     
                     // Status de estoque
                     $stock_status = $product->get_stock_status();
@@ -323,13 +334,18 @@ class Evo_Reels {
                         'id' => $product->get_id(),
                         'title' => $product->get_name(),
                         'price' => $price,
+                        'regular_price' => $regular_price,
+                        'sale_price' => $sale_price,
                         'formatted_price' => strip_tags($formatted_price),
+                        'formatted_regular_price' => $formatted_regular_price ? strip_tags($formatted_regular_price) : '',
+                        'on_sale' => $product->is_on_sale(),
                         'description' => wp_strip_all_tags($product->get_description()),
                         'short_description' => wp_strip_all_tags($product->get_short_description()),
                         'stock_status' => $stock_status,
                         'stock_text' => $stock_text,
                         'sku' => $product->get_sku(),
                         'permalink' => get_permalink($product->get_id()),
+                        'add_to_cart_url' => $product->add_to_cart_url(),
                         'images' => array(),
                     );
                     

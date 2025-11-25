@@ -67,5 +67,16 @@
     transform: scale(2.2);
   }
 
+  /* Responsividade do modal */
+  @media (max-width: 767px) {
+    #evo-reels-root {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  }
+
 }
 

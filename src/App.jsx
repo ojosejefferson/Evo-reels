@@ -21,17 +21,22 @@ function App() {
       id: data.id || data.ID || undefined,
       title: data.title || data.name || '',
       price: data.price || '0',
+      regular_price: data.regular_price || '',
+      sale_price: data.sale_price || '',
       formatted_price: data.formatted_price || (data.price ? 
         new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL'
         }).format(parseFloat(data.price)) : 'R$ 0,00'),
+      formatted_regular_price: data.formatted_regular_price || '',
+      on_sale: data.on_sale || false,
       description: data.description || '',
       short_description: data.short_description || '',
       stock_status: data.stock_status || '',
       stock_text: data.stock_text || '',
       sku: data.sku || '',
       permalink: data.permalink || '#',
+      add_to_cart_url: data.add_to_cart_url || '',
       images: Array.isArray(data.images) ? data.images.filter(img => img && img.trim() !== '') : [],
     };
     
@@ -173,17 +178,31 @@ function App() {
         stockText = 'Sob encomenda';
       }
       
+      // Preços
+      const regularPrice = product.regular_price || '';
+      const salePrice = product.sale_price || '';
+      const formattedRegularPrice = regularPrice ? 
+        new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(parseFloat(regularPrice)) : '';
+      
       const processedData = {
         id: product.id,
         title: product.name,
         price: product.price,
+        regular_price: regularPrice,
+        sale_price: salePrice,
         formatted_price: formattedPrice,
+        formatted_regular_price: formattedRegularPrice,
+        on_sale: product.on_sale || false,
         description: product.description || '',
         short_description: product.short_description || '',
         stock_status: product.stock_status,
         stock_text: stockText,
         sku: product.sku || '',
         permalink: product.permalink || '#',
+        add_to_cart_url: product.add_to_cart_url || '',
         images: product.images?.map(img => img.src).filter(src => src) || [],
       };
       
