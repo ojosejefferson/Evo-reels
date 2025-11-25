@@ -231,6 +231,7 @@ function App() {
       <Miniplayer 
         videoUrl={videoUrl}
         onOpenModal={handleOpenModal}
+        isModalOpen={isModalOpen}
       />
       {isModalOpen && (
         <ProductModal

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-const Miniplayer = ({ videoUrl, onOpenModal }) => {
+const Miniplayer = ({ videoUrl, onOpenModal, isModalOpen = false }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [wasDragging, setWasDragging] = useState(false);
   const [position, setPosition] = useState({ x: null, y: null });
@@ -25,6 +25,20 @@ const Miniplayer = ({ videoUrl, onOpenModal }) => {
       videoRef.current.play().catch(() => {});
     }
   }, [videoUrl]);
+
+  // Pausa o vídeo quando o modal abrir
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isModalOpen) {
+        videoRef.current.pause();
+      } else {
+        // Retoma o vídeo quando o modal fechar (se ainda estiver visível)
+        if (isVisible) {
+          videoRef.current.play().catch(() => {});
+        }
+      }
+    }
+  }, [isModalOpen, isVisible]);
 
   const handleMouseDown = (e) => {
     if (e.target.classList.contains('evo-circle-close')) return;
