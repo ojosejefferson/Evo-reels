@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body, html {
+    height: 100%;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+@layer components {
+  /* Spinner de carregamento */
+  .spinner {
+    border-top-color: #fff;
+    animation: spinner 1s linear infinite;
+  }
+
+  @keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Barra de progresso do vídeo */
+  .evo-reels-progress-line {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .evo-reels-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+
+  .evo-reels-progress-handle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+
+  /* Estilos de zoom */
+  .slide-zoom img {
+    transition: transform 0.4s ease;
+    transform-origin: center center;
+  }
+
+  .slide-zoom:hover img {
+    transform: scale(2.2);
+  }
+
+}
+

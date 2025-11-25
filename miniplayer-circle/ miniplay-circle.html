@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVO-CIRCLE - Mini Player Circular Flutuante</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="evo-circle-miniplayer.css">
+</head>
+<body>
+
+    <div id="evoCirclePlayer" class="evo-circle-player">
+        <button class="evo-circle-close" onclick="EvoCircle.close()">X</button>
+        <video id="evoCircleVideo" autoplay loop muted playsinline preload="auto">
+            <source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="evoCircleModal" class="evo-circle-modal" onclick="EvoCircle.closeModal()">
+        <button class="evo-circle-modal-close" onclick="EvoCircle.closeModal()">X</button>
+        <video id="evoCircleFullVideo" controls playsinline class="w-full max-w-5xl">
+            <source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <script src="evo-circle-miniplayer.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVO Reels - Desenvolvimento</title>
+</head>
+<body>
+  <div id="evo-reels-root"></div>
+  <script>
+    // Dados mockados para desenvolvimento
+    window.evoReelsData = {
+      productId: 1,
+      videoUrl: 'https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4',
+      productData: {
+        id: 1,
+        title: 'Jaqueta Branca Premium',
+        price: '399.90',
+        description: 'Tecido premium italiano, acabamento perfeito. Esta jaqueta é a peça chave para qualquer estação, combinando estilo e durabilidade. Edição limitada.',
+        images: [
+          'https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg',
+          'https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg',
+          'https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg',
+        ],
+        stock: 'in_stock',
+      },
+      restUrl: '/wp-json/wc/v3/products/',
+    };
+  </script>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
+
