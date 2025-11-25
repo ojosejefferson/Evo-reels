@@ -11,6 +11,7 @@ function App() {
   useEffect(() => {
     // Tenta obter dados do objeto global primeiro (mais rápido)
     if (window.evoReelsData?.productData && window.evoReelsData?.videoUrl) {
+      console.log('EVO Reels - Dados do produto:', window.evoReelsData.productData);
       setProductData(window.evoReelsData.productData);
       setVideoUrl(window.evoReelsData.videoUrl);
       return;
@@ -29,7 +30,9 @@ function App() {
 
       if (productDataAttr) {
         try {
-          setProductData(JSON.parse(productDataAttr));
+          const parsedData = JSON.parse(productDataAttr);
+          console.log('EVO Reels - Dados parseados:', parsedData);
+          setProductData(parsedData);
         } catch (e) {
           console.error('Erro ao parsear dados do produto:', e);
         }

@@ -11,7 +11,7 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
   const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showProgressHandle, setShowProgressHandle] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const verticalSwiperRef = useRef(null);
   const horizontalSwiperRefs = useRef({});
   const videoRef = useRef(null);
@@ -19,15 +19,16 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
   const modalRef = useRef(null);
 
   useEffect(() => {
-    // Animação de entrada
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300);
+    // Pequeno delay para garantir que o DOM está pronto antes de animar
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10);
     
     if (videoRef.current && currentVideoTime > 0) {
       videoRef.current.currentTime = currentVideoTime;
     }
     if (videoRef.current) {
-      videoRef.current.play();
+      videoRef.current.play().catch(() => {});
       setIsVideoPlaying(true);
     }
     
@@ -35,6 +36,7 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
     document.body.style.overflow = 'hidden';
     
     return () => {
+      clearTimeout(timer);
       document.body.style.overflow = '';
     };
   }, []);
@@ -80,13 +82,23 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
   };
 
   const images = productData?.images || [];
+  
+  // Debug: verifica se os dados estão chegando
+  useEffect(() => {
+    console.log('ProductModal - Dados do produto:', productData);
+    console.log('ProductModal - Imagens:', images);
+    console.log('ProductModal - Título:', productData?.title);
+    console.log('ProductModal - Preço:', productData?.formatted_price || productData?.price);
+  }, [productData, images]);
 
   return (
     <div 
       ref={modalRef}
-      className={`fixed inset-0 bg-black/80 z-[10000] flex items-center justify-center p-0 md:p-5 backdrop-blur-sm transition-opacity duration-300 ${
-        isAnimating ? 'opacity-0' : 'opacity-100'
-      }`}
+      className="fixed inset-0 bg-black/80 z-[10000] flex items-center justify-center p-0 md:p-5 backdrop-blur-sm"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+      }}
       onClick={(e) => {
         if (e.target === modalRef.current) {
           onClose();
@@ -100,10 +112,16 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
         ×
       </button>
 
-      <div className={`w-full h-full md:flex md:flex-row md:justify-center md:items-center md:gap-0 md:h-[683px] md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 transition-all duration-300 ${
-        isAnimating ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-      }`}
-      onClick={(e) => e.stopPropagation()}
+      <div 
+        className="w-full h-full md:flex md:flex-row md:justify-center md:items-center md:gap-0 md:h-[683px] md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
+        style={{
+          transform: isVisible 
+            ? 'translate(-50%, -50%) scale(1)' 
+            : 'translate(-50%, -50%) scale(0.95)',
+          opacity: isVisible ? 1 : 0,
+          transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Swiper Vertical */}
         <Swiper
@@ -179,15 +197,30 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
               </SwiperSlide>
 
               {/* Slides de Imagens */}
-              {images.map((image, index) => (
-                <SwiperSlide key={index} className="slide-zoom cursor-crosshair relative">
-                  <img
-                    src={image}
-                    alt={`${productData?.title} - ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+              {images && images.length > 0 ? (
+                images.map((image, index) => {
+                  if (!image) return null;
+                  return (
+                    <SwiperSlide key={`image-${index}`} className="slide-zoom cursor-crosshair relative">
+                      <img
+                        src={image}
+                        alt={`${productData?.title || 'Produto'} - ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error('Erro ao carregar imagem:', image);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </SwiperSlide>
+                  );
+                })
+              ) : (
+                <SwiperSlide className="slide-zoom cursor-crosshair relative">
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center text-white">
+                    <p>Nenhuma imagem disponível</p>
+                  </div>
                 </SwiperSlide>
-              ))}
+              )}
             </Swiper>
 
             {/* Controles Superiores */}
@@ -228,7 +261,7 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
                     {productData?.title || 'Produto'}
                   </div>
                   <div className="product-price text-sm font-semibold text-green-400">
-                    {productData?.formatted_price || `R$ ${productData?.price || '0,00'}`}
+                    {productData?.formatted_price || (productData?.price ? `R$ ${parseFloat(productData.price).toFixed(2).replace('.', ',')}` : 'R$ 0,00')}
                   </div>
                 </div>
               </div>
@@ -270,7 +303,7 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
         <div className="hidden md:block md:w-[400px] md:h-[683px] bg-white p-8 overflow-y-auto rounded-r-[16px] shadow-2xl text-black flex-shrink-0">
           <h2 className="text-3xl font-bold mb-4">{productData?.title || 'Produto'}</h2>
           <div className="text-4xl font-extrabold mb-6 text-green-600">
-            {productData?.formatted_price || `R$ ${productData?.price || '0,00'}`}
+            {productData?.formatted_price || (productData?.price ? `R$ ${parseFloat(productData.price).toFixed(2).replace('.', ',')}` : 'R$ 0,00')}
           </div>
           <p className="text-gray-700 leading-relaxed mb-8 whitespace-pre-line">
             {productData?.description || productData?.short_description || ''}
@@ -330,7 +363,7 @@ const ProductModal = ({ productData, videoUrl, onClose }) => {
         
         <h3 className="modal-title text-2xl font-bold mb-2">{productData?.title || 'Produto'}</h3>
         <div className="modal-price text-3xl font-extrabold mb-3 text-green-600">
-          {productData?.formatted_price || `R$ ${productData?.price || '0,00'}`}
+          {productData?.formatted_price || (productData?.price ? `R$ ${parseFloat(productData.price).toFixed(2).replace('.', ',')}` : 'R$ 0,00')}
         </div>
         <p className="modal-desc text-base leading-relaxed text-gray-600 mb-8 whitespace-pre-line">
           {productData?.description || productData?.short_description || ''}

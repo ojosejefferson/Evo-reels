@@ -254,17 +254,21 @@ class Evo_Reels {
             'images' => array(),
         );
         
-        $image_ids = $product->get_gallery_image_ids();
-        foreach ($image_ids as $image_id) {
-            $product_data['images'][] = wp_get_attachment_image_url($image_id, 'full');
+        // Adiciona a imagem principal primeiro
+        if ($product->get_image_id()) {
+            $main_image = wp_get_attachment_image_url($product->get_image_id(), 'full');
+            if ($main_image) {
+                $product_data['images'][] = $main_image;
+            }
         }
         
-        // Adiciona a imagem principal
-        if ($product->get_image_id()) {
-            array_unshift(
-                $product_data['images'],
-                wp_get_attachment_image_url($product->get_image_id(), 'full')
-            );
+        // Adiciona imagens da galeria
+        $image_ids = $product->get_gallery_image_ids();
+        foreach ($image_ids as $image_id) {
+            $image_url = wp_get_attachment_image_url($image_id, 'full');
+            if ($image_url && !in_array($image_url, $product_data['images'])) {
+                $product_data['images'][] = $image_url;
+            }
         }
         
         // Renderiza o container React
@@ -325,16 +329,21 @@ class Evo_Reels {
                         'images' => array(),
                     );
                     
-                    $image_ids = $product->get_gallery_image_ids();
-                    foreach ($image_ids as $image_id) {
-                        $product_data['images'][] = wp_get_attachment_image_url($image_id, 'full');
+                    // Adiciona a imagem principal primeiro
+                    if ($product->get_image_id()) {
+                        $main_image = wp_get_attachment_image_url($product->get_image_id(), 'full');
+                        if ($main_image) {
+                            $product_data['images'][] = $main_image;
+                        }
                     }
                     
-                    if ($product->get_image_id()) {
-                        array_unshift(
-                            $product_data['images'],
-                            wp_get_attachment_image_url($product->get_image_id(), 'full')
-                        );
+                    // Adiciona imagens da galeria
+                    $image_ids = $product->get_gallery_image_ids();
+                    foreach ($image_ids as $image_id) {
+                        $image_url = wp_get_attachment_image_url($image_id, 'full');
+                        if ($image_url && !in_array($image_url, $product_data['images'])) {
+                            $product_data['images'][] = $image_url;
+                        }
                     }
                     
                     echo '<div id="evo-reels-root" 
