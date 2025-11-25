@@ -271,19 +271,23 @@ class Evo_Reels {
             }
         }
         
+        // Debug: verifica dados antes de enviar
+        error_log('EVO Reels - Dados do produto (PHP): ' . print_r($product_data, true));
+        
         // Renderiza o container React
         ob_start();
         ?>
         <div id="evo-reels-root" 
              data-product-id="<?php echo esc_attr($product_id); ?>"
              data-video-url="<?php echo esc_url($video_url); ?>"
-             data-product-data="<?php echo esc_attr(wp_json_encode($product_data)); ?>">
+             data-product-data="<?php echo esc_attr(wp_json_encode($product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)); ?>">
         </div>
         <script>
             window.evoReelsData = window.evoReelsData || {};
-            window.evoReelsData.productId = <?php echo $product_id; ?>;
-            window.evoReelsData.videoUrl = <?php echo wp_json_encode($video_url); ?>;
-            window.evoReelsData.productData = <?php echo wp_json_encode($product_data); ?>;
+            window.evoReelsData.productId = <?php echo intval($product_id); ?>;
+            window.evoReelsData.videoUrl = <?php echo wp_json_encode($video_url, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+            window.evoReelsData.productData = <?php echo wp_json_encode($product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+            console.log('EVO Reels - Dados do PHP:', window.evoReelsData);
         </script>
         <?php
         return ob_get_clean();
@@ -349,13 +353,14 @@ class Evo_Reels {
                     echo '<div id="evo-reels-root" 
                          data-product-id="' . esc_attr($product_id) . '"
                          data-video-url="' . esc_url($video_url) . '"
-                         data-product-data="' . esc_attr(wp_json_encode($product_data)) . '">
+                         data-product-data="' . esc_attr(wp_json_encode($product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '">
                          </div>';
                     echo '<script>
                         window.evoReelsData = window.evoReelsData || {};
-                        window.evoReelsData.productId = ' . $product_id . ';
-                        window.evoReelsData.videoUrl = ' . wp_json_encode($video_url) . ';
-                        window.evoReelsData.productData = ' . wp_json_encode($product_data) . ';
+                        window.evoReelsData.productId = ' . intval($product_id) . ';
+                        window.evoReelsData.videoUrl = ' . wp_json_encode($video_url, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';
+                        window.evoReelsData.productData = ' . wp_json_encode($product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';
+                        console.log("EVO Reels - Dados do PHP (footer):", window.evoReelsData);
                     </script>';
                 }
             }
