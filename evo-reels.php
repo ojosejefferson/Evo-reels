@@ -115,9 +115,10 @@ class Evo_Reels {
 	public function activate() {
 		// Set default settings.
 		$default_settings = array(
-			'enabled'   => true,
-			'shape'     => 'circle',
-			'position'  => 'right',
+			'enabled'                => true,
+			'shape'                  => 'circle',
+			'position'               => 'right',
+			'product_modal_template' => 'split-view',
 		);
 
 		if ( ! get_option( 'evo_reels_settings' ) ) {

@@ -12,6 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/main.jsx'),
+        'product-modal': resolve(__dirname, 'src/product-modal.jsx'),
       },
       output: {
         entryFileNames: 'assets/[name].js',

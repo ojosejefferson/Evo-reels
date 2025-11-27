@@ -49,9 +49,10 @@ class Evo_Reels_Admin {
 			array(
 				'sanitize_callback' => array( $this, 'sanitize_settings' ),
 				'default'           => array(
-					'enabled'  => true,
-					'shape'    => 'circle',
-					'position' => 'right',
+					'enabled'                => true,
+					'shape'                  => 'circle',
+					'position'               => 'right',
+					'product_modal_template' => 'split-view',
 				),
 			)
 		);
@@ -66,9 +67,10 @@ class Evo_Reels_Admin {
 	public function sanitize_settings( $input ) {
 		$sanitized = array();
 
-		$sanitized['enabled'] = isset( $input['enabled'] ) && $input['enabled'] ? true : false;
-		$sanitized['shape']   = isset( $input['shape'] ) && in_array( $input['shape'], array( 'circle', 'rectangle' ), true ) ? sanitize_text_field( $input['shape'] ) : 'circle';
-		$sanitized['position'] = isset( $input['position'] ) && in_array( $input['position'], array( 'left', 'right' ), true ) ? sanitize_text_field( $input['position'] ) : 'right';
+		$sanitized['enabled']                = isset( $input['enabled'] ) && $input['enabled'] ? true : false;
+		$sanitized['shape']                  = isset( $input['shape'] ) && in_array( $input['shape'], array( 'circle', 'rectangle' ), true ) ? sanitize_text_field( $input['shape'] ) : 'circle';
+		$sanitized['position']               = isset( $input['position'] ) && in_array( $input['position'], array( 'left', 'right' ), true ) ? sanitize_text_field( $input['position'] ) : 'right';
+		$sanitized['product_modal_template']  = isset( $input['product_modal_template'] ) && in_array( $input['product_modal_template'], array( 'details-panel', 'split-view' ), true ) ? sanitize_text_field( $input['product_modal_template'] ) : 'split-view';
 
 		return $sanitized;
 	}
@@ -122,6 +124,23 @@ class Evo_Reels_Admin {
 									<option value="right" <?php selected( isset( $settings['position'] ) ? $settings['position'] : 'right', 'right' ); ?>><?php esc_html_e( 'Right', 'evo-reels' ); ?></option>
 								</select>
 								<p class="description"><?php esc_html_e( 'Choose the default position of the mini player.', 'evo-reels' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row" colspan="2">
+								<h2><?php esc_html_e( 'Modal de Produto', 'evo-reels' ); ?></h2>
+							</th>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label for="evo_reels_product_modal_template"><?php esc_html_e( 'Template do Modal', 'evo-reels' ); ?></label>
+							</th>
+							<td>
+								<select id="evo_reels_product_modal_template" name="evo_reels_settings[product_modal_template]">
+									<option value="split-view" <?php selected( isset( $settings['product_modal_template'] ) ? $settings['product_modal_template'] : 'split-view', 'split-view' ); ?>><?php esc_html_e( 'Split View + Modal (TikTok Style)', 'evo-reels' ); ?></option>
+									<option value="details-panel" <?php selected( isset( $settings['product_modal_template'] ) ? $settings['product_modal_template'] : 'split-view', 'details-panel' ); ?>><?php esc_html_e( 'Painel Lateral (Instagram Style)', 'evo-reels' ); ?></option>
+								</select>
+								<p class="description"><?php esc_html_e( 'Escolha o template do modal de produto que será exibido.', 'evo-reels' ); ?></p>
 							</td>
 						</tr>
 					</tbody>

@@ -1,0 +1,106 @@
+/* * CSS Customizado: Necessário para Spinner, Paginação, e Scrubber Handle
+ * (Elementos que exigem keyframes ou z-index/posicionamento complexo)
+ */
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* Estilos base para garantir 100% de altura/largura em dispositivos móveis */
+body, html { 
+  height: 100%; 
+  width: 100%;
+  background: #000; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+  overflow: hidden;
+}
+
+/* * Spinner: O indicador de carregamento. */
+.spinner {
+  border-top-color: #fff;
+  -webkit-animation: spinner 1s linear infinite;
+  animation: spinner 1s linear infinite;
+}
+@-webkit-keyframes spinner {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Barra de progresso do vídeo (Container para clique) */
+.evo-reels-video-progress {
+  position: absolute; 
+  bottom: 9px; 
+  left: 20px; 
+  right: 20px;
+  height: 10px; /* Área de toque aumentada para acessibilidade */
+  background: transparent; /* Torna a área de toque invisível */
+  z-index: 20; 
+  cursor: pointer;
+  padding-top: 3.5px; /* Alinha o visual com a área de toque aumentada */
+}
+/* Linha visual do progresso */
+.evo-reels-progress-line {
+  height: 3px; 
+  background: rgba(255,255,255,0.3); 
+  border-radius: 2px;
+  position: relative;
+}
+.evo-reels-progress-fill {
+  width: 0%; 
+  height: 100%; 
+  background: white; 
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+/* Handle visual (Bolha) */
+.evo-reels-progress-handle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    width: 10px; /* Tamanho da bolha */
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0; /* Escondido por padrão, aparece ao interagir/tocar */
+    transition: opacity 0.1s;
+}
+
+
+/* Estilos de zoom de lupa (Desktop: Hover/Mousemove) */
+.slide-zoom img {
+  transition: transform 0.4s ease;
+  transform-origin: center center;
+}
+/* Desktop: Zoom ativado por HOVER */
+.slide-zoom:hover img {
+    transform: scale(2.2);
+}
+
+/* ** MELHORIA: Destaque e Z-INDEX da Paginação ** */
+.swiper-pagination-horizontal.swiper-pagination-bullets {
+    bottom: 140px; 
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+    z-index: 30; 
+    position: absolute;
+}
+.swiper-pagination-bullet {
+    width: 10px; 
+    height: 10px; 
+    background: rgba(255,255,255,0.5); 
+    opacity: 1;
+    transition: all 0.3s;
+}
+.swiper-pagination-bullet-active {
+    background: white; 
+    transform: scale(1.3); 
+    border: 1px solid rgba(0,0,0,0.2);
+}
+/* Estilo do modal customizado (mantido para classes modais) */
+.modal.bottom-0 { bottom: 0; }
+

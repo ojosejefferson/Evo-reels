@@ -21,6 +21,24 @@ class Evo_Reels_Frontend {
 	public function __construct() {
 		add_action( 'wp_footer', array( $this, 'render_mini_player' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_filter( 'script_loader_tag', array( $this, 'add_module_attribute' ), 10, 2 );
+	}
+	
+	/**
+	 * Add type="module" attribute to Evo Reels scripts.
+	 *
+	 * @param string $tag    The script tag.
+	 * @param string $handle The script handle.
+	 * @return string
+	 */
+	public function add_module_attribute( $tag, $handle ) {
+		if ( 'evo-reels-frontend' === $handle || 'evo-reels-client' === $handle ) {
+			// Add type="module" if not already present
+			if ( false === strpos( $tag, 'type="module"' ) && false === strpos( $tag, "type='module'" ) ) {
+				$tag = str_replace( '<script ', '<script type="module" ', $tag );
+			}
+		}
+		return $tag;
 	}
 
 	/**
@@ -31,6 +49,12 @@ class Evo_Reels_Frontend {
 	private function should_display_player() {
 		// Check if enabled in settings.
 		$settings = get_option( 'evo_reels_settings', array() );
+		
+		// Default to enabled if settings don't exist
+		if ( ! isset( $settings['enabled'] ) ) {
+			$settings['enabled'] = true;
+		}
+		
 		if ( empty( $settings['enabled'] ) ) {
 			return false;
 		}
@@ -41,7 +65,12 @@ class Evo_Reels_Frontend {
 		}
 
 		// Get video from post meta.
-		$video_url = get_post_meta( get_the_ID(), '_evo_reels_video', true );
+		$post_id = get_the_ID();
+		if ( ! $post_id ) {
+			return false;
+		}
+		
+		$video_url = get_post_meta( $post_id, '_evo_reels_video', true );
 		if ( empty( $video_url ) ) {
 			return false;
 		}
@@ -59,9 +88,10 @@ class Evo_Reels_Frontend {
 		$video_url = get_post_meta( get_the_ID(), '_evo_reels_video', true );
 
 		return array(
-			'videoUrl'  => esc_url( $video_url ),
-			'shape'     => isset( $settings['shape'] ) ? sanitize_text_field( $settings['shape'] ) : 'circle',
-			'position'  => isset( $settings['position'] ) ? sanitize_text_field( $settings['position'] ) : 'right',
+			'videoUrl'                => esc_url( $video_url ),
+			'shape'                  => isset( $settings['shape'] ) ? sanitize_text_field( $settings['shape'] ) : 'circle',
+			'position'               => isset( $settings['position'] ) ? sanitize_text_field( $settings['position'] ) : 'right',
+			'productModalTemplate'   => isset( $settings['product_modal_template'] ) ? sanitize_text_field( $settings['product_modal_template'] ) : 'split-view',
 		);
 	}
 
@@ -69,8 +99,13 @@ class Evo_Reels_Frontend {
 	 * Enqueue frontend scripts.
 	 */
 	public function enqueue_scripts() {
+		// Debug: Log check
+		$should_display = $this->should_display_player();
+		
 		// Only enqueue if player should be displayed.
-		if ( ! $this->should_display_player() ) {
+		if ( ! $should_display ) {
+			// Debug mode: uncomment to see why it's not displaying
+			// error_log('Evo Reels: Player not displayed. Enabled: ' . (isset($settings['enabled']) ? 'yes' : 'no') . ', Singular: ' . (is_singular() ? 'yes' : 'no') . ', Video URL: ' . ($video_url ?? 'none'));
 			return;
 		}
 
@@ -105,8 +140,35 @@ class Evo_Reels_Frontend {
 				if ( ! empty( $entry['css'] ) && is_array( $entry['css'] ) ) {
 					$css_url = EVO_REELS_PLUGIN_URL . 'dist/' . $entry['css'][0];
 				}
+				
+				// Load client chunk if it exists in imports
+				if ( ! empty( $entry['imports'] ) && is_array( $entry['imports'] ) ) {
+					foreach ( $entry['imports'] as $import_key ) {
+						$client_key = '_' . $import_key;
+						if ( isset( $manifest[ $client_key ] ) && ! empty( $manifest[ $client_key ]['file'] ) ) {
+							$client_url = EVO_REELS_PLUGIN_URL . 'dist/' . $manifest[ $client_key ]['file'];
+							$client_file_path = EVO_REELS_PLUGIN_DIR . str_replace( EVO_REELS_PLUGIN_URL, '', $client_url );
+							if ( file_exists( $client_file_path ) ) {
+								wp_enqueue_script(
+									'evo-reels-client',
+									$client_url,
+									array(),
+									EVO_REELS_VERSION,
+									array(
+										'strategy'  => 'defer',
+										'in_footer' => true,
+									)
+								);
+							}
+						}
+					}
+				}
 			}
 		}
+		
+		// Debug: Log URLs
+		// error_log('Evo Reels: JS URL: ' . $js_url);
+		// error_log('Evo Reels: CSS URL: ' . $css_url);
 
 		// Check if files exist before enqueueing.
 		$js_file_path  = EVO_REELS_PLUGIN_DIR . str_replace( EVO_REELS_PLUGIN_URL, '', $js_url );
@@ -127,12 +189,19 @@ class Evo_Reels_Frontend {
 			);
 		}
 
+		// Pass configuration to React component first.
+		$config = $this->get_player_config();
+		
 		// Enqueue JS.
-
+		$dependencies = array();
+		if ( wp_script_is( 'evo-reels-client', 'registered' ) ) {
+			$dependencies[] = 'evo-reels-client';
+		}
+		
 		wp_enqueue_script(
 			'evo-reels-frontend',
 			$js_url,
-			array(),
+			$dependencies,
 			EVO_REELS_VERSION,
 			array(
 				'strategy'  => 'defer',
@@ -140,12 +209,18 @@ class Evo_Reels_Frontend {
 			)
 		);
 
-		// Pass configuration to React component.
-		$config = $this->get_player_config();
+		// Localize script after enqueue.
 		wp_localize_script(
 			'evo-reels-frontend',
 			'evoReelsConfig',
 			$config
+		);
+		
+		// Debug: Add inline script to verify config is available
+		wp_add_inline_script(
+			'evo-reels-frontend',
+			'console.log("Evo Reels: Config loaded", window.evoReelsConfig);',
+			'after'
 		);
 	}
 
@@ -158,7 +233,12 @@ class Evo_Reels_Frontend {
 		}
 
 		?>
-		<div id="evo-reels-root"></div>
+		<!-- Evo Reels Mini Player -->
+		<div id="evo-reels-root" data-evo-reels="enabled"></div>
+		<script>
+			// Debug: Verify element exists
+			console.log('Evo Reels: Root element rendered', document.getElementById('evo-reels-root'));
+		</script>
 		<?php
 	}
 }
