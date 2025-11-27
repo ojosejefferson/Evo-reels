@@ -4,3 +4,13 @@ dist/
 *.log
 .env
 .env.local
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+.vite/

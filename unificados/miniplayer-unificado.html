@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Evo Reels – Mini Player Unificado (Teste)</title>
+
+  <!-- Tailwind CDN (só para teste rápido) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ==================== MINI PLAYER UNIFICADO ==================== */
+
+    /* PLAYER CIRCULAR (DIREITA) */
+    .evo-circle-player {
+      width: 100px;
+      height: 100px;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      cursor: grab;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(white, white) padding-box,
+                  conic-gradient(from 0deg, #ff00c3, #ff6bff, #00f2ff, #00ff9d, #ff00c3) border-box;
+      border: 4px solid transparent;
+      transition: all 0.4s ease;
+    }
+
+    .evo-circle-player:hover {
+      transform: scale(1.12);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .evo-circle-player video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    /* PLAYER RETANGULAR (ESQUERDA) */
+    .evo-square-player {
+      width: 100px;
+      height: 165px;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+      cursor: grab;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      background: #000;
+      transition: all 0.3s ease;
+    }
+
+    .evo-square-player:hover {
+      transform: scale(1.06);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    .evo-square-player video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* BOTÃO FECHAR COMUM */
+    .evo-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      transition: all 0.2s;
+    }
+
+    .evo-close:hover {
+      background: rgba(220, 38, 38, 0.9);
+      transform: scale(1.15);
+    }
+
+    /* Responsivo mobile */
+    @media (max-width: 640px) {
+      .evo-circle-player { bottom: 90px; right: 12px; width: 80px; height: 80px; }
+      .evo-square-player { bottom: 90px; left: 12px; width: 80px; height: 140px; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="p-10 text-center">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">Teste Mini Player Unificado</h1>
+    <p class="text-gray-600">Role a página para ver os dois mini players funcionando ao mesmo tempo!</p>
+  </div>
+
+  <!-- PLAYER CIRCULAR (DIREITA) -->
+  <div id="evoCirclePlayer" class="evo-circle-player">
+    <button class="evo-close" onclick="hidePlayer('evoCirclePlayer')">X</button>
+    <video autoplay loop muted playsinline preload="auto">
+      <source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- PLAYER RETANGULAR (ESQUERDA) -->
+  <div id="evoSquarePlayer" class="evo-square-player">
+    <button class="evo-close" onclick="hidePlayer('evoSquarePlayer')">X</button>
+    <video autoplay loop muted playsinline preload="auto">
+      <source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <script>
+    // Função para esconder um player específico
+    function hidePlayer(id) {
+      const player = document.getElementById(id);
+      player.style.opacity = '0';
+      setTimeout(() => player.style.display = 'none', 300);
+    }
+
+    // Drag & Drop unificado (funciona nos dois)
+    document.querySelectorAll('.evo-circle-player, .evo-square-player').forEach(player => {
+      let isDragging = false;
+      let wasDragging = false;
+      let offset = { x: 0, y: 0 };
+
+      const start = (e) => {
+        if (e.target.classList.contains('evo-close')) return;
+        isDragging = true;
+        player.style.cursor = 'grabbing';
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        offset.x = clientX - player.getBoundingClientRect().left;
+        offset.y = clientY - player.getBoundingClientRect().top;
+        e.preventDefault();
+      };
+
+      const move = (e) => {
+        if (!isDragging) return;
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        player.style.left = `${clientX - offset.x}px`;
+        player.style.top = `${clientY - offset.y}px`;
+        player.style.right = 'auto';
+        player.style.bottom = 'auto';
+        wasDragging = true;
+        e.preventDefault();
+      };
+
+      const end = () => {
+        isDragging = false;
+        player.style.cursor = 'grab';
+        setTimeout(() => wasDragging = false, 100);
+      };
+
+      player.addEventListener('mousedown', start);
+      player.addEventListener('touchstart', start);
+      document.addEventListener('mousemove', move);
+      document.addEventListener('touchmove', move, { passive: false });
+      document.addEventListener('mouseup', end);
+      document.addEventListener('touchend', end);
+    });
+  </script>
+</body>
+</html>

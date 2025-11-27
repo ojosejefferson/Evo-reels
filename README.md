@@ -1,89 +1,153 @@
-# EVO Reels - Plugin React para WooCommerce
+# Evo Reels - WordPress Plugin
 
-Plugin WordPress que exibe reels de produtos com miniplayer circular e modal de detalhes, desenvolvido com React, Tailwind CSS e Swiper.js.
+Floating mini video player plugin for WordPress/WooCommerce with React-based frontend. Displays draggable video players on posts, pages, and WooCommerce products.
 
-## Características
+## Features
 
-- 🎬 Miniplayer circular arrastável com vídeo em loop
-- 📱 Modal responsivo com Swiper para navegação vertical e horizontal
-- 🛍️ Integração completa com WooCommerce
-- 📤 Upload de vídeo no postbox de produtos
-- ⚡ Construído com React e Vite
-- 🎨 Estilizado com Tailwind CSS
+- 🎥 Floating mini video player with drag & drop functionality
+- ⚙️ Admin settings page to configure player shape and position
+- 📦 Meta box for video upload on posts, pages, and WooCommerce products
+- ⚛️ Built with React 18 (hooks) and Vite
+- 🎨 Tailwind CSS for styling
+- 📱 Fully responsive design
+- 🔒 Security: Nonces, sanitization, and escaping
+- ⚡ Performance: Deferred scripts, lazy loading
 
-## Instalação
+## Requirements
 
-1. Instale as dependências:
+- PHP 8.2+
+- WordPress 6.6+
+- WooCommerce 9.x (optional, for product support)
+- Node.js 18+ and npm/yarn (for building)
+
+## Installation
+
+### 1. Install Dependencies
+
 ```bash
+cd wp-content/plugins/evo-reels
 npm install
 ```
 
-2. Construa o plugin:
+### 2. Build Assets
+
 ```bash
 npm run build
 ```
 
-3. Ative o plugin no WordPress
+This will create the production build in the `dist/` directory.
 
-## Uso
+### 3. Activate Plugin
 
-### No Admin do WooCommerce
+Go to WordPress Admin → Plugins and activate "Evo Reels".
 
-1. Vá para **Produtos > Adicionar Novo** (ou editar um produto existente)
-2. No painel lateral, você verá a meta box **"Vídeo Reels"**
-3. Faça upload ou cole a URL do vídeo
-4. Salve o produto
+## Development
 
-### No Frontend
+### Development Mode
 
-Use o shortcode em qualquer página ou post:
-
-```
-[evo_reels product_id="123"]
-```
-
-Ou simplesmente:
-
-```
-[evo_reels]
-```
-
-(usará o ID do produto atual se estiver em uma página de produto)
-
-## Desenvolvimento
-
-Para desenvolvimento com hot reload:
+For development with hot module replacement:
 
 ```bash
 npm run dev
 ```
 
-## Estrutura do Projeto
+Note: The Vite dev server runs on a different port. For WordPress integration, you'll need to build first (`npm run build`) or configure proxy settings.
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+This generates optimized, minified files in the `dist/` directory.
+
+## Usage
+
+### 1. Configure Settings
+
+Go to **Settings → Evo Reels** and configure:
+- Enable/Disable the mini player
+- Player shape (Circle or Rectangle)
+- Player position (Left or Right)
+
+### 2. Add Video to Post/Page/Product
+
+1. Edit any post, page, or WooCommerce product
+2. Find the "Evo Reels Video" meta box in the sidebar
+3. Click "Upload Video" to select an MP4 file from media library
+4. Save the post/page/product
+
+### 3. View on Frontend
+
+The mini player will automatically appear on the frontend of pages that have a video uploaded. The player is:
+- Draggable (click and drag to move)
+- Closable (click the X button)
+- Responsive (adjusts size on mobile)
+
+## Plugin Structure
 
 ```
 evo-reels/
+├── assets/
+│   └── js/
+│       └── admin.js          # Admin meta box functionality
+├── includes/
+│   ├── class-admin.php       # Admin settings and meta box
+│   └── class-frontend.php    # Frontend enqueue and rendering
 ├── src/
 │   ├── components/
-│   │   ├── Miniplayer.jsx
-│   │   └── ProductModal.jsx
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── assets/
-│   └── admin.js
-├── dist/ (gerado após build)
-├── evo-reels.php
+│   │   ├── MiniPlayer.jsx    # React component
+│   │   └── MiniPlayer.css    # Component styles
+│   ├── main.jsx              # React entry point
+│   └── index.css             # Tailwind imports
+├── dist/                     # Built assets (generated)
+├── evo-reels.php             # Main plugin file
 ├── package.json
-└── vite.config.js
+├── vite.config.js
+├── tailwind.config.js
+└── postcss.config.js
 ```
 
-## Requisitos
+## Customization
 
-- WordPress 5.0+
-- WooCommerce 3.0+
-- PHP 7.4+
-- Node.js 16+ (para desenvolvimento)
+### Changing Default Styles
 
-## Licença
+Edit `src/components/MiniPlayer.css` to customize player appearance.
+
+### Modifying React Component
+
+Edit `src/components/MiniPlayer.jsx` to change functionality.
+
+After making changes, rebuild:
+
+```bash
+npm run build
+```
+
+## Security
+
+- All inputs are sanitized
+- Nonces are used for form submissions
+- Outputs are escaped
+- User capabilities are checked
+
+## Performance
+
+- JavaScript is deferred
+- CSS is minified
+- Assets are only loaded on pages with videos
+- Code splitting via Vite
+
+## Browser Support
+
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+- IE11 is not supported
+
+## License
 
 GPL v2 or later
+
+## Support
+
+For issues and feature requests, please contact the plugin author.
