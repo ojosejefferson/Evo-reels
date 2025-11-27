@@ -37,8 +37,20 @@ export const executeProductSplitViewJS = (productsData = {}) => {
 	function hideLoading(id) {
 		const indicator = document.getElementById('loading-' + id);
 		if (indicator) {
+			// Remove immediately with no transition delay
+			indicator.style.display = 'none';
+			indicator.style.opacity = '0';
 			indicator.classList.add('opacity-0');
-			setTimeout(() => indicator.style.display = 'none', 300);
+		}
+	}
+	
+	// Função auxiliar para mostrar o loading spinner (se necessário)
+	function showLoading(id) {
+		const indicator = document.getElementById('loading-' + id);
+		if (indicator) {
+			indicator.style.display = 'flex';
+			indicator.style.opacity = '1';
+			indicator.classList.remove('opacity-0');
 		}
 	}
 
@@ -48,9 +60,21 @@ export const executeProductSplitViewJS = (productsData = {}) => {
 		img.addEventListener('load', () => hideLoading(loadingId));
 	});
 
-	// Ocultar spinner do vídeo
+	// Ocultar spinner do vídeo - múltiplos eventos para garantir remoção rápida
 	if (video) {
-		video.addEventListener('canplaythrough', () => hideLoading(1));
+		const hideVideoLoading = () => {
+			hideLoading(1);
+		};
+		
+		// Hide on multiple events to ensure quick removal
+		video.addEventListener('loadeddata', hideVideoLoading, { once: true });
+		video.addEventListener('canplay', hideVideoLoading, { once: true });
+		video.addEventListener('canplaythrough', hideVideoLoading, { once: true });
+		
+		// If video is already ready, hide immediately
+		if (video.readyState >= 2) {
+			hideVideoLoading();
+		}
 	}
 
 	// ** 1. Configuração do Swiper Vertical (Feed de Reels) **
