@@ -6,7 +6,7 @@ import { executeProductSplitViewJS } from '../utils/productSplitViewJS';
  * Product Split View Component
  * TikTok Style - Split View with Modal
  */
-const ProductSplitView = ({ productsData = {} }) => {
+const ProductSplitView = ({ productsData = {}, onClose }) => {
 	const containerRef = useRef(null);
 	const scriptLoadedRef = useRef(false);
 
@@ -115,7 +115,7 @@ const ProductSplitView = ({ productsData = {} }) => {
 						
 						<div className="top-controls absolute top-4 right-4 flex gap-3 z-30">
 							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" id="evo-reels-sound-btn-1" onClick={() => window.toggleSound && window.toggleSound(1)}>Volume Off</button>
-							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={() => window.close && window.close()}>X</button>
+							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={onClose || (() => window.close && window.close())}>X</button>
 						</div>
 						
 						<div className="overlay absolute inset-0 p-5 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent/40 to-transparent text-white pointer-events-none z-10">
@@ -161,7 +161,7 @@ const ProductSplitView = ({ productsData = {} }) => {
 						</div>
 						
 						<div className="top-controls absolute top-4 right-4 flex gap-3 z-30">
-							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={() => window.close && window.close()}>X</button>
+							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={onClose || (() => window.close && window.close())}>X</button>
 						</div>
 						<div className="overlay absolute inset-0 p-5 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent/40 to-transparent text-white pointer-events-none z-10">
 							<div className="top"><h4 className="text-xl font-semibold pointer-events-auto">Reels</h4></div>

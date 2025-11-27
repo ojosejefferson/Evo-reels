@@ -6,7 +6,7 @@ import { executeProductDetailsPanelJS } from '../utils/productDetailsPanelJS';
  * Product Details Panel Component
  * Instagram Style - Split View with Desktop Details Panel
  */
-const ProductDetailsPanel = ({ productsData = {} }) => {
+const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 	const containerRef = useRef(null);
 	const scriptLoadedRef = useRef(false);
 
@@ -124,7 +124,7 @@ const ProductDetailsPanel = ({ productsData = {} }) => {
 							
 							<div className="top-controls absolute top-4 right-4 flex gap-3 z-30">
 								<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" id="evo-reels-sound-btn-1" onClick={() => window.toggleSound && window.toggleSound(1)}>Volume Off</button>
-								<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={() => window.close && window.close()}>X</button>
+								<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={onClose || (() => window.close && window.close())}>X</button>
 							</div>
 							
 							<div className="footer pointer-events-auto cursor-pointer z-20 md:hidden absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-transparent/40 to-transparent" onClick={() => window.openModal && window.openModal(1)}>

@@ -30,16 +30,18 @@ import MiniPlayer from './components/MiniPlayer';
 
 			// Create React root and render
 			try {
-				const root = createRoot(rootElement);
-				root.render(
-					<React.StrictMode>
-						<MiniPlayer
-							videoUrl={config.videoUrl}
-							shape={config.shape || 'circle'}
-							position={config.position || 'right'}
-						/>
-					</React.StrictMode>
-				);
+			const root = createRoot(rootElement);
+			root.render(
+				<React.StrictMode>
+					<MiniPlayer
+						videoUrl={config.videoUrl}
+						shape={config.shape || 'circle'}
+						position={config.position || 'right'}
+						productModalTemplate={config.productModalTemplate || 'split-view'}
+						productData={config.productData || {}}
+					/>
+				</React.StrictMode>
+			);
 				console.log('Evo Reels: Mini player initialized successfully');
 				return true;
 			} catch (error) {

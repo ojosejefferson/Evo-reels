@@ -85,13 +85,46 @@ class Evo_Reels_Frontend {
 	 */
 	private function get_player_config() {
 		$settings = get_option( 'evo_reels_settings', array() );
-		$video_url = get_post_meta( get_the_ID(), '_evo_reels_video', true );
+		$post_id = get_the_ID();
+		$video_url = get_post_meta( $post_id, '_evo_reels_video', true );
+
+		// Get product/post data for modal
+		$product_data = array();
+		if ( $post_id ) {
+			$post = get_post( $post_id );
+			$title = get_the_title( $post_id );
+			$description = '';
+			$price = '';
+
+			// Try to get WooCommerce product data
+			if ( class_exists( 'WooCommerce' ) && 'product' === get_post_type( $post_id ) ) {
+				$product = wc_get_product( $post_id );
+				if ( $product ) {
+					$title = $product->get_name();
+					$description = $product->get_short_description() ?: $product->get_description();
+					$price = $product->get_price_html();
+				}
+			} else {
+				// For posts/pages, get excerpt or content
+				$description = get_the_excerpt( $post_id ) ?: wp_trim_words( get_the_content( $post_id ), 30 );
+			}
+
+			$product_data = array(
+				'1' => array(
+					'title'       => $title,
+					'price'       => $price,
+					'description' => $description,
+					'videoUrl'    => esc_url( $video_url ),
+				),
+			);
+		}
 
 		return array(
 			'videoUrl'                => esc_url( $video_url ),
 			'shape'                  => isset( $settings['shape'] ) ? sanitize_text_field( $settings['shape'] ) : 'circle',
 			'position'               => isset( $settings['position'] ) ? sanitize_text_field( $settings['position'] ) : 'right',
 			'productModalTemplate'   => isset( $settings['product_modal_template'] ) ? sanitize_text_field( $settings['product_modal_template'] ) : 'split-view',
+			'productData'            => $product_data,
 		);
 	}
 
