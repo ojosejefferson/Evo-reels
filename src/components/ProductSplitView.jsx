@@ -75,7 +75,26 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 	const products = Object.keys(productsData).length > 0 ? productsData : defaultProducts;
 
 	return (
-		<div ref={containerRef} className="evo-reels-product-split-view">
+		<div 
+			ref={containerRef} 
+			className="evo-reels-product-split-view"
+			style={{ 
+				width: '100%', 
+				height: '100%',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				pointerEvents: 'auto',
+			}}
+			onClick={(e) => {
+				// Stop propagation for content clicks only
+				if (e.target.closest('.swiper') || 
+					e.target.closest('.evo-reels-reel-container') ||
+					e.target.closest('.modal')) {
+					e.stopPropagation();
+				}
+			}}
+		>
 			<div className="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden 
 						md:w-[384px] md:h-[683px] md:rounded-[36px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
 				<div className="swiper-wrapper">

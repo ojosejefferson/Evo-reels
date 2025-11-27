@@ -43,7 +43,7 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 	}
 
 	const handleBackdropClick = (e) => {
-		// Close if clicking backdrop (not children)
+		// Close if clicking directly on backdrop (this should be handled by overlay div now)
 		if (e.target === e.currentTarget) {
 			e.stopPropagation();
 			e.preventDefault();
@@ -83,9 +83,45 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 				e.stopPropagation();
 			}}
 		>
+			{/* Invisible overlay to catch clicks outside content */}
+			<div
+				style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					width: '100%',
+					height: '100%',
+					zIndex: 1,
+				}}
+				onClick={(e) => {
+					// Close if clicking on this overlay (empty space)
+					if (e.target === e.currentTarget) {
+						e.stopPropagation();
+						e.preventDefault();
+						onClose();
+					}
+				}}
+			/>
+			
+			{/* Content wrapper - stops propagation for content clicks */}
 			<div 
-				onClick={(e) => e.stopPropagation()}
-				onMouseDown={(e) => e.stopPropagation()}
+				style={{ 
+					width: '100%', 
+					height: '100%',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					position: 'relative',
+					zIndex: 2,
+				}}
+				onClick={(e) => {
+					// Stop propagation for all content clicks
+					e.stopPropagation();
+				}}
+				onMouseDown={(e) => {
+					// Stop propagation for mousedown too
+					e.stopPropagation();
+				}}
 			>
 				{modalContent}
 			</div>

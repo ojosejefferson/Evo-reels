@@ -113,16 +113,16 @@ class Evo_Reels_Frontend {
 							$sale_price = $product->get_sale_price();
 							if ( $regular_price && $sale_price ) {
 								// Format: "R$ 99,90 R$ 149,90" (sale price first, then regular)
-								$sale_formatted = wp_strip_all_tags( wc_price( $sale_price ) );
-								$regular_formatted = wp_strip_all_tags( wc_price( $regular_price ) );
+								$sale_formatted = html_entity_decode( wp_strip_all_tags( wc_price( $sale_price ) ), ENT_QUOTES, 'UTF-8' );
+								$regular_formatted = html_entity_decode( wp_strip_all_tags( wc_price( $regular_price ) ), ENT_QUOTES, 'UTF-8' );
 								$price = $sale_formatted . ' ' . $regular_formatted;
 							} else {
 								// Fallback to current price
-								$price = wp_strip_all_tags( wc_price( $price_raw ) );
+								$price = html_entity_decode( wp_strip_all_tags( wc_price( $price_raw ) ), ENT_QUOTES, 'UTF-8' );
 							}
 						} else {
-							// Regular price - use wc_price() to format correctly
-							$price = wp_strip_all_tags( wc_price( $price_raw ) );
+							// Regular price - use wc_price() to format correctly, then decode HTML entities
+							$price = html_entity_decode( wp_strip_all_tags( wc_price( $price_raw ) ), ENT_QUOTES, 'UTF-8' );
 						}
 					} else {
 						// Free product

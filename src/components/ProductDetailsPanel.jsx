@@ -81,7 +81,26 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 	const products = Object.keys(productsData).length > 0 ? productsData : defaultProducts;
 
 	return (
-		<div ref={containerRef} className="evo-reels-product-details-panel">
+		<div 
+			ref={containerRef} 
+			className="evo-reels-product-details-panel"
+			style={{ 
+				width: '100%', 
+				height: '100%',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				pointerEvents: 'auto',
+			}}
+			onClick={(e) => {
+				// Stop propagation for content clicks only
+				if (e.target.closest('#main-split-container') || 
+					e.target.closest('.swiper') ||
+					e.target.closest('.modal')) {
+					e.stopPropagation();
+				}
+			}}
+		>
 			<div id="main-split-container" className="w-full h-full md:flex md:flex-row md:justify-center md:items-center md:gap-0 
 				 md:h-[683px] md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
 				
