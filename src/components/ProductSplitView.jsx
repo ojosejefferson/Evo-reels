@@ -79,20 +79,23 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 			ref={containerRef} 
 			className="evo-reels-product-split-view"
 			style={{ 
-				width: '100%', 
-				height: '100%',
-				display: 'flex',
-				alignItems: 'center',
-				justifyContent: 'center',
-				pointerEvents: 'auto',
+				position: 'relative',
+				width: 'auto', 
+				height: 'auto',
+				maxWidth: '100%',
+				maxHeight: '100%',
 			}}
 			onClick={(e) => {
-				// Stop propagation for content clicks only
-				if (e.target.closest('.swiper') || 
-					e.target.closest('.evo-reels-reel-container') ||
-					e.target.closest('.modal')) {
-					e.stopPropagation();
-				}
+				// Stop propagation for all clicks on this container
+				e.stopPropagation();
+			}}
+			onMouseDown={(e) => {
+				// Stop propagation for mousedown too
+				e.stopPropagation();
+			}}
+			onTouchStart={(e) => {
+				// Stop propagation for touch events
+				e.stopPropagation();
 			}}
 		>
 			<div className="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden 

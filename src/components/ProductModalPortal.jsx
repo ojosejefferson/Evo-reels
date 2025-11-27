@@ -42,15 +42,6 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 		return null;
 	}
 
-	const handleBackdropClick = (e) => {
-		// Close if clicking directly on backdrop (this should be handled by overlay div now)
-		if (e.target === e.currentTarget) {
-			e.stopPropagation();
-			e.preventDefault();
-			onClose();
-		}
-	};
-
 	const modalContent = template === 'details-panel' ? (
 		<ProductDetailsPanel 
 			productsData={productData}
@@ -64,71 +55,83 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 	);
 
 	return createPortal(
-		<div 
-			className="evo-reels-modal-backdrop"
-			style={{
-				position: 'fixed',
-				top: 0,
-				left: 0,
-				width: '100%',
-				height: '100%',
-				backgroundColor: 'rgba(0, 0, 0, 0.9)',
-				zIndex: 999999,
-				overflow: 'auto',
-				pointerEvents: 'auto',
-			}}
-			onClick={handleBackdropClick}
-			onMouseDown={(e) => {
-				// Prevent event bubbling to mini player
-				e.stopPropagation();
-			}}
-		>
-			{/* Invisible overlay to catch clicks outside content */}
-			<div
+		<>
+			{/* Backdrop - behind everything, closes on click */}
+			<div 
+				className="evo-reels-modal-backdrop"
 				style={{
-					position: 'absolute',
+					position: 'fixed',
 					top: 0,
 					left: 0,
 					width: '100%',
 					height: '100%',
-					zIndex: 1,
+					backgroundColor: 'rgba(0, 0, 0, 0.9)',
+					zIndex: 999998,
+					pointerEvents: 'auto',
 				}}
 				onClick={(e) => {
-					// Close if clicking on this overlay (empty space)
+					// Close if clicking directly on backdrop
 					if (e.target === e.currentTarget) {
 						e.stopPropagation();
 						e.preventDefault();
 						onClose();
 					}
 				}}
+				onMouseDown={(e) => {
+					// Prevent event bubbling to mini player
+					e.stopPropagation();
+				}}
 			/>
 			
-			{/* Content wrapper - stops propagation for content clicks */}
-			<div 
-				style={{ 
-					width: '100%', 
+			{/* Content wrapper - above backdrop, transparent to clicks outside */}
+			<div
+				style={{
+					position: 'fixed',
+					top: 0,
+					left: 0,
+					width: '100%',
 					height: '100%',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					position: 'relative',
-					zIndex: 2,
+					zIndex: 999999, // Above backdrop
+					pointerEvents: 'none', // Allow backdrop clicks to pass through
+					overflow: 'auto',
 				}}
 				onClick={(e) => {
-					// Stop propagation for all content clicks
-					e.stopPropagation();
-				}}
-				onMouseDown={(e) => {
-					// Stop propagation for mousedown too
-					e.stopPropagation();
+					// Close if clicking on empty space (wrapper itself)
+					if (e.target === e.currentTarget) {
+						e.stopPropagation();
+						e.preventDefault();
+						onClose();
+					}
 				}}
 			>
-				{modalContent}
+				{/* Content container - enables pointer events and stops propagation */}
+				<div
+					style={{
+						position: 'relative',
+						pointerEvents: 'auto', // Enable clicks on content
+					}}
+					onClick={(e) => {
+						// Stop propagation for all content clicks
+						e.stopPropagation();
+					}}
+					onMouseDown={(e) => {
+						// Stop propagation for mousedown
+						e.stopPropagation();
+					}}
+					onTouchStart={(e) => {
+						// Stop propagation for touch events
+						e.stopPropagation();
+					}}
+				>
+					{modalContent}
+				</div>
 			</div>
-		</div>,
+		</>,
 		portalContainer
 	);
 };
 
 export default ProductModalPortal;
-

@@ -17,6 +17,7 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 	const isDraggingRef = useRef(false);
 	const offsetRef = useRef({ x: 0, y: 0 });
 	const dragStartPosRef = useRef({ x: 0, y: 0 });
+	const interactionStartedOnPlayerRef = useRef(false);
 
 	// Initialize position based on shape and position props
 	useEffect(() => {
@@ -129,51 +130,100 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 
 		// If it was a click (not a drag), open modal after a short delay
 		// But only if modal is not already open (prevent reopening)
-		setTimeout(() => {
-			if (!hadDragged && playerRef.current && !isModalOpen) {
-				if (e) {
-					e.stopPropagation();
+		// And only if interaction started on the player
+		if (interactionStartedOnPlayerRef.current) {
+			setTimeout(() => {
+				if (!hadDragged && playerRef.current && !isModalOpen) {
+					if (e) {
+						e.stopPropagation();
+					}
+					setIsModalOpen(true);
 				}
-				setIsModalOpen(true);
-			}
+				setHasDragged(false);
+			}, 100);
+		} else {
 			setHasDragged(false);
-		}, 100);
+		}
 	}, [hasDragged, isModalOpen]);
 
-	// Handle click to open modal (separate from drag) - disabled, using handleEnd instead
+	// Handle click to open modal - ONLY if it's a real click (not drag)
 	const handleClick = useCallback((e) => {
-		// This is a fallback, but handleEnd should handle it
 		// Don't open if clicking close button
 		if (e.target.classList.contains('evo-close') || e.target.closest('.evo-close')) {
 			return;
 		}
-	}, []);
+		
+		// Only open if it wasn't a drag and interaction started on player
+		if (!hasDragged && interactionStartedOnPlayerRef.current && !isModalOpen) {
+			e.stopPropagation();
+			e.preventDefault();
+			setIsModalOpen(true);
+		}
+	}, [hasDragged, isModalOpen]);
 
-	// Setup drag event listeners
+	// Setup drag event listeners - ONLY on player element
 	useEffect(() => {
 		if (!playerRef.current) return;
 
 		const player = playerRef.current;
 
-		player.addEventListener('mousedown', handleStart);
-		player.addEventListener('touchstart', handleStart, { passive: false });
-		
-		document.addEventListener('mousemove', handleMove);
-		document.addEventListener('touchmove', handleMove, { passive: false });
-		document.addEventListener('mouseup', handleEnd);
-		document.addEventListener('touchend', handleEnd);
+		// Handler to check if interaction started on player
+		const handleInteractionStart = (e) => {
+			// CRITICAL: Only process if event started on the player or its children
+			if (player.contains(e.target)) {
+				interactionStartedOnPlayerRef.current = true;
+				handleStart(e);
+			} else {
+				// Reset if interaction didn't start on player
+				interactionStartedOnPlayerRef.current = false;
+			}
+		};
 
-		// Add click handler for opening modal
-		player.addEventListener('click', handleClick);
+		// Handler for move - only if started on player
+		const handleInteractionMove = (e) => {
+			if (interactionStartedOnPlayerRef.current && isDraggingRef.current) {
+				handleMove(e);
+			}
+		};
+
+		// Handler for end - only if started on player
+		const handleInteractionEnd = (e) => {
+			// CRITICAL: Only process if interaction started AND ended on player
+			if (interactionStartedOnPlayerRef.current && player.contains(e.target)) {
+				handleEnd(e);
+				// Reset after processing
+				setTimeout(() => {
+					interactionStartedOnPlayerRef.current = false;
+				}, 150);
+			} else {
+				// Reset if interaction didn't start/end on player
+				interactionStartedOnPlayerRef.current = false;
+				isDraggingRef.current = false;
+				setHasDragged(false);
+			}
+		};
+
+		// Add listeners ONLY on player element
+		player.addEventListener('mousedown', handleInteractionStart, { passive: false });
+		player.addEventListener('touchstart', handleInteractionStart, { passive: false });
+		
+		// Document listeners for move/end (but only process if started on player)
+		document.addEventListener('mousemove', handleInteractionMove, { passive: false });
+		document.addEventListener('touchmove', handleInteractionMove, { passive: false });
+		document.addEventListener('mouseup', handleInteractionEnd);
+		document.addEventListener('touchend', handleInteractionEnd);
+
+		// Add click handler ONLY on player
+		player.addEventListener('click', handleClick, { passive: false });
 
 		return () => {
-			player.removeEventListener('mousedown', handleStart);
-			player.removeEventListener('touchstart', handleStart);
+			player.removeEventListener('mousedown', handleInteractionStart);
+			player.removeEventListener('touchstart', handleInteractionStart);
 			player.removeEventListener('click', handleClick);
-			document.removeEventListener('mousemove', handleMove);
-			document.removeEventListener('touchmove', handleMove);
-			document.removeEventListener('mouseup', handleEnd);
-			document.removeEventListener('touchend', handleEnd);
+			document.removeEventListener('mousemove', handleInteractionMove);
+			document.removeEventListener('touchmove', handleInteractionMove);
+			document.removeEventListener('mouseup', handleInteractionEnd);
+			document.removeEventListener('touchend', handleInteractionEnd);
 		};
 	}, [handleStart, handleMove, handleEnd, handleClick]);
 
@@ -224,12 +274,16 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 			<div
 				ref={playerRef}
 				className={playerClass}
-				style={playerStyle}
+				style={{
+					...playerStyle,
+					touchAction: 'none', // Prevent default touch behaviors
+				}}
 			>
 				<button
 					className="evo-close"
 					onClick={handleClose}
 					onMouseDown={(e) => e.stopPropagation()}
+					onTouchStart={(e) => e.stopPropagation()}
 					aria-label="Close player"
 				>
 					X
@@ -241,6 +295,9 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 					muted
 					playsInline
 					preload="auto"
+					style={{
+						touchAction: 'none', // Prevent video touch conflicts
+					}}
 				>
 					<source src={videoUrl} type="video/mp4" />
 				</video>
