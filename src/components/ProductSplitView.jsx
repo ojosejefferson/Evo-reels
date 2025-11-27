@@ -80,22 +80,27 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 			className="evo-reels-product-split-view"
 			style={{ 
 				position: 'relative',
-				width: 'auto', 
-				height: 'auto',
-				maxWidth: '100%',
-				maxHeight: '100%',
+				width: '100%',
+				height: '100%',
 			}}
 			onClick={(e) => {
-				// Stop propagation for all clicks on this container
-				e.stopPropagation();
+				// Don't stop propagation - let parent handle clicks outside content
+				// Only stop if clicking on actual content
+				if (e.target.closest('.swiper')) {
+					e.stopPropagation();
+				}
 			}}
 			onMouseDown={(e) => {
-				// Stop propagation for mousedown too
-				e.stopPropagation();
+				// Same logic for mousedown
+				if (e.target.closest('.swiper')) {
+					e.stopPropagation();
+				}
 			}}
 			onTouchStart={(e) => {
-				// Stop propagation for touch events
-				e.stopPropagation();
+				// Same logic for touch events
+				if (e.target.closest('.swiper')) {
+					e.stopPropagation();
+				}
 			}}
 		>
 			<div className="swiper evo-reels-vertical-swiper w-full h-screen md:h-[683px] relative overflow-hidden 

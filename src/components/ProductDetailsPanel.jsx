@@ -86,29 +86,42 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 			className="evo-reels-product-details-panel"
 			style={{ 
 				position: 'relative',
-				width: 'auto', 
-				height: 'auto',
-				maxWidth: '100%',
-				maxHeight: '100%',
+				width: '100%',
+				height: '100%',
 			}}
 			onClick={(e) => {
-				// Stop propagation for all clicks on this container
-				e.stopPropagation();
+				// Don't stop propagation - let parent handle clicks outside content
+				// Only stop if clicking on actual content
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container') ||
+					e.target.closest('#desktop-details-panel')) {
+					e.stopPropagation();
+				}
 			}}
 			onMouseDown={(e) => {
-				// Stop propagation for mousedown too
-				e.stopPropagation();
+				// Same logic for mousedown
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container') ||
+					e.target.closest('#desktop-details-panel')) {
+					e.stopPropagation();
+				}
 			}}
 			onTouchStart={(e) => {
-				// Stop propagation for touch events
-				e.stopPropagation();
+				// Same logic for touch events
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container') ||
+					e.target.closest('#desktop-details-panel')) {
+					e.stopPropagation();
+				}
 			}}
 		>
-			<div id="main-split-container" className="w-full h-screen md:h-[683px] md:flex md:flex-row md:justify-center md:items-center md:gap-0 
+			<div id="main-split-container" className="w-full h-screen md:h-[683px] md:flex md:flex-row md:items-center md:gap-0 
 				 md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
 				
 				<div className="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden flex-shrink-0 
-							md:w-[384px] md:h-[683px] md:rounded-l-[16px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
+							md:w-[384px] md:h-[683px] md:rounded-l-[16px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper" style={{
+								height: '100%',
+							}}>
 					<div className="swiper-wrapper">
 						
 						<div className="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-product-id="1">

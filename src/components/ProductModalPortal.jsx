@@ -70,8 +70,12 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					pointerEvents: 'auto',
 				}}
 				onClick={(e) => {
+					// Close if clicking directly on backdrop (not on content)
+					const target = e.target;
+					const currentTarget = e.currentTarget;
+					
 					// Close if clicking directly on backdrop
-					if (e.target === e.currentTarget) {
+					if (target === currentTarget) {
 						e.stopPropagation();
 						e.preventDefault();
 						onClose();
@@ -92,7 +96,6 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					left: 0,
 					width: '100%',
 					height: '100%',
-					minHeight: '100vh',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -101,11 +104,37 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					overflow: 'auto',
 				}}
 				onClick={(e) => {
-					// Close if clicking on empty space (wrapper itself)
-					if (e.target === e.currentTarget) {
-						e.stopPropagation();
-						e.preventDefault();
+					// Close if clicking on empty space
+					const target = e.target;
+					const currentTarget = e.currentTarget;
+					
+					// Close if clicking directly on wrapper
+					if (target === currentTarget) {
 						onClose();
+						return;
+					}
+					
+					// Close if clicking on container divs outside content
+					if (target.classList.contains('evo-reels-product-split-view') || 
+						target.classList.contains('evo-reels-product-details-panel')) {
+						// Check if click is outside the actual content area
+						const contentArea = target.querySelector('.swiper, #main-split-container');
+						if (contentArea) {
+							const rect = contentArea.getBoundingClientRect();
+							const clickX = e.clientX;
+							const clickY = e.clientY;
+							
+							// If click is outside content bounds, close modal
+							if (clickX < rect.left || 
+								clickX > rect.right || 
+								clickY < rect.top || 
+								clickY > rect.bottom) {
+								onClose();
+							}
+						} else {
+							// No content area found, close modal
+							onClose();
+						}
 					}
 				}}
 			>
@@ -114,9 +143,6 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					className="evo-reels-modal-content-inner"
 					style={{
 						position: 'relative',
-						width: '100%',
-						height: '100%',
-						minHeight: '100vh',
 						pointerEvents: 'auto', // Enable clicks on content
 					}}
 					onClick={(e) => {
