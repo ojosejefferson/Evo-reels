@@ -83,14 +83,13 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					backgroundColor: 'rgba(0, 0, 0, 0.9)',
 					zIndex: 999998,
 					pointerEvents: 'auto',
+					cursor: 'pointer',
 				}}
 				onClick={(e) => {
-					// Close if clicking directly on backdrop (not on content)
-					const target = e.target;
-					const currentTarget = e.currentTarget;
-					
-					// Close if clicking directly on backdrop
-					if (target === currentTarget) {
+					// Close when clicking directly on backdrop
+					// On mobile: content wrapper has pointer-events: none, so clicks pass through
+					// On desktop: content wrapper handles clicks, but backdrop is fallback
+					if (e.target === e.currentTarget || isMobile) {
 						e.stopPropagation();
 						e.preventDefault();
 						onClose();
@@ -102,7 +101,7 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 				}}
 			/>
 			
-			{/* Content wrapper - above backdrop, transparent to clicks outside */}
+			{/* Content wrapper - different behavior for mobile vs desktop */}
 			<div
 				className="evo-reels-modal-content-wrapper"
 				style={{
@@ -111,30 +110,47 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					left: 0,
 					width: '100%',
 					height: '100%',
-					minHeight: '100vh', // Mobile: full screen height
+					minHeight: '100vh',
 					display: 'flex',
-					alignItems: isMobile ? 'stretch' : 'center', // Desktop: center, Mobile: stretch
-					justifyContent: 'center', // Center horizontally
-					zIndex: 999999, // Above backdrop
-					pointerEvents: 'none', // Allow backdrop clicks to pass through
-					overflow: 'auto',
+					alignItems: isMobile ? 'stretch' : 'center',
+					justifyContent: 'center',
+					zIndex: 999999,
+					pointerEvents: isMobile ? 'none' : 'auto', // Mobile: allow backdrop clicks, Desktop: detect overlay clicks
+					overflow: isMobile ? 'hidden' : 'auto', // Mobile: no scroll, Desktop: allow scroll
 				}}
 				onClick={(e) => {
-					// Close if clicking on empty space
+					// Only handle clicks on desktop
+					if (isMobile) return;
+					
 					const target = e.target;
 					const currentTarget = e.currentTarget;
 					
-					// Close if clicking directly on wrapper
+					// Close if clicking directly on wrapper (empty space/overlay)
 					if (target === currentTarget) {
 						onClose();
 						return;
 					}
 					
-					// Close if clicking on container divs outside content
+					// Check if click is on content or outside
+					const isContentClick = target.closest('.swiper') || 
+										  target.closest('#main-split-container') ||
+										  target.closest('#desktop-details-panel') ||
+										  target.closest('.evo-reels-modal-content-inner') ||
+										  target.closest('.evo-reels-video-slide') ||
+										  target.closest('.evo-reels-reel-container');
+					
+					// If not clicking on content, close modal
+					if (!isContentClick) {
+						onClose();
+						return;
+					}
+					
+					// Additional check for container divs - verify if click is outside content bounds
 					if (target.classList.contains('evo-reels-product-split-view') || 
 						target.classList.contains('evo-reels-product-details-panel')) {
-						// Check if click is outside the actual content area
+						
 						const contentArea = target.querySelector('.swiper, #main-split-container');
+						
 						if (contentArea) {
 							const rect = contentArea.getBoundingClientRect();
 							const clickX = e.clientX;
@@ -147,34 +163,35 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 								clickY > rect.bottom) {
 								onClose();
 							}
-						} else {
-							// No content area found, close modal
-							onClose();
 						}
 					}
 				}}
 			>
-				{/* Content container - enables pointer events and stops propagation */}
+				{/* Content container - different behavior for mobile vs desktop */}
 				<div
 					className="evo-reels-modal-content-inner"
 					style={{
 						position: 'relative',
 						width: '100%',
-						height: '100%',
-						minHeight: '100vh', // Mobile: full screen height
+						height: isMobile ? '100vh' : 'auto',
+						minHeight: isMobile ? '100vh' : 'auto',
 						pointerEvents: 'auto', // Enable clicks on content
 					}}
 					onClick={(e) => {
-						// Stop propagation for all content clicks
+						// Stop propagation for all content clicks (both mobile and desktop)
 						e.stopPropagation();
 					}}
 					onMouseDown={(e) => {
 						// Stop propagation for mousedown
-						e.stopPropagation();
+						if (!isMobile) {
+							e.stopPropagation();
+						}
 					}}
 					onTouchStart={(e) => {
-						// Stop propagation for touch events
-						e.stopPropagation();
+						// Stop propagation for touch events (mobile)
+						if (isMobile) {
+							e.stopPropagation();
+						}
 					}}
 				>
 					{modalContent}
