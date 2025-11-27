@@ -95,6 +95,7 @@ class Evo_Reels_Frontend {
 			$title = get_the_title( $post_id );
 			$description = '';
 			$price = '';
+			$price_formatted = '';
 
 			// Try to get WooCommerce product data
 			if ( class_exists( 'WooCommerce' ) && 'product' === get_post_type( $post_id ) ) {
@@ -102,7 +103,31 @@ class Evo_Reels_Frontend {
 				if ( $product ) {
 					$title = $product->get_name();
 					$description = $product->get_short_description() ?: $product->get_description();
-					$price = $product->get_price_html();
+					
+					// Get price using WooCommerce function - returns clean formatted price
+					$price_raw = $product->get_price();
+					if ( $price_raw ) {
+						// For sale prices, show sale price and regular price
+						if ( $product->is_on_sale() ) {
+							$regular_price = $product->get_regular_price();
+							$sale_price = $product->get_sale_price();
+							if ( $regular_price && $sale_price ) {
+								// Format: "R$ 99,90 R$ 149,90" (sale price first, then regular)
+								$sale_formatted = wp_strip_all_tags( wc_price( $sale_price ) );
+								$regular_formatted = wp_strip_all_tags( wc_price( $regular_price ) );
+								$price = $sale_formatted . ' ' . $regular_formatted;
+							} else {
+								// Fallback to current price
+								$price = wp_strip_all_tags( wc_price( $price_raw ) );
+							}
+						} else {
+							// Regular price - use wc_price() to format correctly
+							$price = wp_strip_all_tags( wc_price( $price_raw ) );
+						}
+					} else {
+						// Free product
+						$price = __( 'Grátis', 'evo-reels' );
+					}
 				}
 			} else {
 				// For posts/pages, get excerpt or content
@@ -112,7 +137,7 @@ class Evo_Reels_Frontend {
 			$product_data = array(
 				'1' => array(
 					'title'       => $title,
-					'price'       => $price,
+					'price'       => $price, // Clean text version (no HTML)
 					'description' => $description,
 					'videoUrl'    => esc_url( $video_url ),
 				),

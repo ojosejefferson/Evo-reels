@@ -43,8 +43,10 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 	}
 
 	const handleBackdropClick = (e) => {
-		// Close if clicking backdrop
+		// Close if clicking backdrop (not children)
 		if (e.target === e.currentTarget) {
+			e.stopPropagation();
+			e.preventDefault();
 			onClose();
 		}
 	};
@@ -76,8 +78,17 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 				pointerEvents: 'auto',
 			}}
 			onClick={handleBackdropClick}
+			onMouseDown={(e) => {
+				// Prevent event bubbling to mini player
+				e.stopPropagation();
+			}}
 		>
-			{modalContent}
+			<div 
+				onClick={(e) => e.stopPropagation()}
+				onMouseDown={(e) => e.stopPropagation()}
+			>
+				{modalContent}
+			</div>
 		</div>,
 		portalContainer
 	);

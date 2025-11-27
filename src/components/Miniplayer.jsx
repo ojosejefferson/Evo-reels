@@ -118,7 +118,7 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 	}, []);
 
 	// Handle drag end
-	const handleEnd = useCallback(() => {
+	const handleEnd = useCallback((e) => {
 		const hadDragged = hasDragged;
 		isDraggingRef.current = false;
 		
@@ -128,13 +128,17 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 		}));
 
 		// If it was a click (not a drag), open modal after a short delay
+		// But only if modal is not already open (prevent reopening)
 		setTimeout(() => {
-			if (!hadDragged && playerRef.current) {
+			if (!hadDragged && playerRef.current && !isModalOpen) {
+				if (e) {
+					e.stopPropagation();
+				}
 				setIsModalOpen(true);
 			}
 			setHasDragged(false);
 		}, 100);
-	}, [hasDragged]);
+	}, [hasDragged, isModalOpen]);
 
 	// Handle click to open modal (separate from drag) - disabled, using handleEnd instead
 	const handleClick = useCallback((e) => {
@@ -190,14 +194,24 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 	};
 
 	// Use product data from props, fallback to DOM if not provided
-	const finalProductData = Object.keys(productData).length > 0 ? productData : {
-		'1': {
-			title: document.querySelector('h1.entry-title, .product_title, h1')?.textContent?.trim() || 'Produto',
-			price: document.querySelector('.price, .woocommerce-Price-amount')?.textContent?.trim() || '',
-			description: document.querySelector('.entry-content, .woocommerce-product-details__short-description')?.textContent?.trim() || '',
-			videoUrl: videoUrl,
+	const finalProductData = Object.keys(productData).length > 0 ? productData : (() => {
+		// Try to get clean price from DOM (strip HTML)
+		const priceElement = document.querySelector('.price, .woocommerce-Price-amount');
+		let cleanPrice = '';
+		if (priceElement) {
+			// Get text content only, no HTML
+			cleanPrice = priceElement.textContent?.trim() || priceElement.innerText?.trim() || '';
 		}
-	};
+		
+		return {
+			'1': {
+				title: document.querySelector('h1.entry-title, .product_title, h1')?.textContent?.trim() || 'Produto',
+				price: cleanPrice,
+				description: document.querySelector('.entry-content, .woocommerce-product-details__short-description')?.textContent?.trim() || '',
+				videoUrl: videoUrl,
+			}
+		};
+	})();
 
 	if (!isVisible || !videoUrl) {
 		return null;

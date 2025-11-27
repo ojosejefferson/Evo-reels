@@ -115,7 +115,20 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 						
 						<div className="top-controls absolute top-4 right-4 flex gap-3 z-30">
 							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" id="evo-reels-sound-btn-1" onClick={() => window.toggleSound && window.toggleSound(1)}>Volume Off</button>
-							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={onClose || (() => window.close && window.close())}>X</button>
+							<button 
+								className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" 
+								onClick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									if (onClose) {
+										onClose();
+									} else if (window.close) {
+										window.close();
+									}
+								}}
+							>
+								X
+							</button>
 						</div>
 						
 						<div className="overlay absolute inset-0 p-5 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent/40 to-transparent text-white pointer-events-none z-10">
@@ -161,7 +174,20 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 						</div>
 						
 						<div className="top-controls absolute top-4 right-4 flex gap-3 z-30">
-							<button className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" onClick={onClose || (() => window.close && window.close())}>X</button>
+							<button 
+								className="control-btn w-11 h-11 bg-black/70 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl cursor-pointer border-none" 
+								onClick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									if (onClose) {
+										onClose();
+									} else if (window.close) {
+										window.close();
+									}
+								}}
+							>
+								X
+							</button>
 						</div>
 						<div className="overlay absolute inset-0 p-5 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent/40 to-transparent text-white pointer-events-none z-10">
 							<div className="top"><h4 className="text-xl font-semibold pointer-events-auto">Reels</h4></div>
@@ -189,7 +215,20 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 			
 			<div className="modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal1">
 				<div className="flex justify-between items-center pb-2">
-					<button className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" onClick={() => window.closeModal && window.closeModal()}>✕</button>
+					<button 
+						className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" 
+						onClick={(e) => {
+							e.stopPropagation();
+							e.preventDefault();
+							if (onClose) {
+								onClose();
+							} else if (window.closeModal) {
+								window.closeModal();
+							}
+						}}
+					>
+						✕
+					</button>
 				</div>
 				<div className="drag-bar w-10 h-1.5 bg-gray-300 rounded-md mx-auto my-2"></div>
 				<img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Jaqueta" />
@@ -201,7 +240,20 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 
 			<div className="modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal2">
 				<div className="flex justify-between items-center pb-2">
-					<button className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" onClick={() => window.closeModal && window.closeModal()}>✕</button>
+					<button 
+						className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" 
+						onClick={(e) => {
+							e.stopPropagation();
+							e.preventDefault();
+							if (onClose) {
+								onClose();
+							} else if (window.closeModal) {
+								window.closeModal();
+							}
+						}}
+					>
+						✕
+					</button>
 				</div>
 				<div className="drag-bar w-10 h-1.5 bg-gray-300 rounded-md mx-auto my-2"></div>
 				<img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Tênis" />
