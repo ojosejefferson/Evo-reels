@@ -9,6 +9,21 @@ import ProductSplitView from './ProductSplitView';
  */
 const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }) => {
 	const [portalContainer, setPortalContainer] = useState(null);
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Detect mobile/desktop
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 768);
+		};
+		
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		
+		return () => {
+			window.removeEventListener('resize', checkMobile);
+		};
+	}, []);
 
 	useEffect(() => {
 		// Create or get portal container
@@ -96,9 +111,10 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					left: 0,
 					width: '100%',
 					height: '100%',
+					minHeight: '100vh', // Mobile: full screen height
 					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
+					alignItems: isMobile ? 'stretch' : 'center', // Desktop: center, Mobile: stretch
+					justifyContent: 'center', // Center horizontally
 					zIndex: 999999, // Above backdrop
 					pointerEvents: 'none', // Allow backdrop clicks to pass through
 					overflow: 'auto',
@@ -143,6 +159,9 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 					className="evo-reels-modal-content-inner"
 					style={{
 						position: 'relative',
+						width: '100%',
+						height: '100%',
+						minHeight: '100vh', // Mobile: full screen height
 						pointerEvents: 'auto', // Enable clicks on content
 					}}
 					onClick={(e) => {
