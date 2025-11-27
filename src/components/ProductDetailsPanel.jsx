@@ -104,24 +104,14 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 				e.stopPropagation();
 			}}
 		>
-			<div id="main-split-container" className="w-full h-full h-screen md:h-[683px] md:flex md:flex-row md:justify-center md:items-center md:gap-0 
-				 md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2" style={{
-					 minHeight: '100vh',
-					 height: '100vh',
-				 }}>
+			<div id="main-split-container" className="w-full h-screen md:h-[683px] md:flex md:flex-row md:justify-center md:items-center md:gap-0 
+				 md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
 				
-				<div className="swiper evo-reels-vertical-swiper w-full h-full h-screen md:h-full relative overflow-hidden flex-shrink-0 
-							md:w-[384px] md:rounded-l-[16px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper" style={{
-								minHeight: '100vh',
-								height: '100vh',
-							}}>
+				<div className="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden flex-shrink-0 
+							md:w-[384px] md:h-[683px] md:rounded-l-[16px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
 					<div className="swiper-wrapper">
 						
-						<div className="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-product-id="1" style={{
-							width: '100%',
-							height: '100%',
-							minHeight: '100vh',
-						}}>
+						<div className="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true" data-product-id="1">
 							
 							<div className="evo-reels-video-progress" id="evo-reels-video-progress-1">
 								<div className="evo-reels-progress-line">
@@ -133,11 +123,7 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 							<div className="swiper evo-reels-horizontal-swiper w-full h-full relative" id="evo-reels-horizontal-swiper-1">
 								<div className="swiper-wrapper">
 									
-									<div className="swiper-slide evo-reels-video-slide relative w-full h-full" style={{
-										width: '100%',
-										height: '100%',
-										minHeight: '100vh',
-									}}>
+									<div className="swiper-slide evo-reels-video-slide relative w-full h-full">
 										
 										<div className="loading-indicator absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity duration-300 z-10" id="loading-1" style={{
 											display: 'none', // Hidden by default, will show if video is not ready
@@ -157,8 +143,6 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 												height: '100%',
 												objectFit: 'cover',
 												display: 'block',
-												position: 'relative',
-												zIndex: 1,
 											}}
 										>
 											<source src="https://maksantos.com.br/wp-content/uploads/2024/12/VIDEO-MAKSANTOS-REELS-32-.mp4" type="video/mp4" />
@@ -259,7 +243,9 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 					</div>
 				</div>
 				
-				<div id="desktop-details-panel" className="hidden md:block md:w-[400px] md:h-[683px] bg-white p-8 overflow-y-auto rounded-r-[16px] shadow-2xl text-black flex-shrink-0">
+				<div id="desktop-details-panel" className="hidden md:block md:w-[400px] md:h-[683px] bg-white p-8 overflow-y-auto rounded-r-[16px] shadow-2xl text-black flex-shrink-0" style={{
+					height: '683px',
+				}}>
 					<h2 className="text-3xl font-bold mb-4" id="details-title"></h2>
 					<div className="text-4xl font-extrabold mb-6 text-green-600" id="details-price"></div>
 					<p className="text-gray-700 leading-relaxed mb-8" id="details-description"></p>

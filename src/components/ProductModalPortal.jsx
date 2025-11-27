@@ -85,12 +85,14 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 			
 			{/* Content wrapper - above backdrop, transparent to clicks outside */}
 			<div
+				className="evo-reels-modal-content-wrapper"
 				style={{
 					position: 'fixed',
 					top: 0,
 					left: 0,
 					width: '100%',
 					height: '100%',
+					minHeight: '100vh',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -109,8 +111,12 @@ const ProductModalPortal = ({ isOpen, onClose, template, videoUrl, productData }
 			>
 				{/* Content container - enables pointer events and stops propagation */}
 				<div
+					className="evo-reels-modal-content-inner"
 					style={{
 						position: 'relative',
+						width: '100%',
+						height: '100%',
+						minHeight: '100vh',
 						pointerEvents: 'auto', // Enable clicks on content
 					}}
 					onClick={(e) => {
