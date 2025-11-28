@@ -35,9 +35,9 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 
 		setPlayerStyle(initialStyle);
 
-		// Responsive adjustments
-		const handleResize = () => {
-			if (window.innerWidth <= 640 && playerRef.current) {
+		// Responsive adjustments - aplicar imediatamente se já estiver em mobile
+		const applyMobileStyles = () => {
+			if (window.innerWidth <= 640) {
 				setPlayerStyle((currentStyle) => {
 					const newStyle = { ...currentStyle };
 					if (shape === 'circle') {
@@ -45,13 +45,25 @@ const MiniPlayer = ({ videoUrl, shape = 'circle', position = 'right', productMod
 						newStyle.right = position === 'right' ? '12px' : 'auto';
 						newStyle.left = position === 'left' ? '12px' : 'auto';
 					} else {
+						// Rectangle Player - respeitar configuração de posição
 						newStyle.bottom = '90px';
 						newStyle.left = position === 'left' ? '12px' : 'auto';
 						newStyle.right = position === 'right' ? '12px' : 'auto';
 					}
 					return newStyle;
 				});
+			} else {
+				// Desktop - usar estilos iniciais
+				setPlayerStyle(initialStyle);
 			}
+		};
+
+		// Aplicar estilos mobile imediatamente se necessário
+		applyMobileStyles();
+
+		// Handler para resize
+		const handleResize = () => {
+			applyMobileStyles();
 		};
 
 		window.addEventListener('resize', handleResize);
