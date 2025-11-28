@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import './index.css'; // Tailwind CSS compilado (sem CDN, sem vazamento global)
 import ProductDetailsPanel from './components/ProductDetailsPanel';
 import ProductSplitView from './components/ProductSplitView';
 

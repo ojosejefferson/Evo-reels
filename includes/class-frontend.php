@@ -199,7 +199,30 @@ class Evo_Reels_Frontend {
 					$css_url = EVO_REELS_PLUGIN_URL . 'dist/' . $entry['css'][0];
 				}
 				
-				// Load client chunk if it exists in imports
+				// CRITICAL: Enfileirar CSS dos chunks ANTES do CSS principal (contém Tailwind para os modais)
+				// Buscar TODOS os chunks que têm CSS (ProductSplitView contém o Tailwind completo)
+				foreach ( $manifest as $key => $asset ) {
+					// Buscar chunks que contêm ProductSplitView ou ProductDetailsPanel (com ou sem hash)
+					if ( ( strpos( $key, '_ProductSplitView' ) === 0 || strpos( $key, '_ProductDetailsPanel' ) === 0 ) && 
+						 isset( $asset['css'] ) && is_array( $asset['css'] ) && ! empty( $asset['css'] ) ) {
+						// É um chunk de componente modal com CSS
+						foreach ( $asset['css'] as $css_file ) {
+							$chunk_css_url = EVO_REELS_PLUGIN_URL . 'dist/' . $css_file;
+							$chunk_css_path = EVO_REELS_PLUGIN_DIR . str_replace( EVO_REELS_PLUGIN_URL, '', $chunk_css_url );
+							if ( file_exists( $chunk_css_path ) ) {
+								wp_enqueue_style(
+									'evo-reels-tailwind',
+									$chunk_css_url,
+									array(), // SEM dependências - carrega primeiro
+									EVO_REELS_VERSION
+								);
+								break 2; // Sair dos dois loops após encontrar o primeiro CSS
+							}
+						}
+					}
+				}
+				
+				// Load client chunk JS if it exists in imports
 				if ( ! empty( $entry['imports'] ) && is_array( $entry['imports'] ) ) {
 					foreach ( $entry['imports'] as $import_key ) {
 						$client_key = '_' . $import_key;
@@ -237,12 +260,12 @@ class Evo_Reels_Frontend {
 			return;
 		}
 
-		// Enqueue CSS if it exists.
+		// Enqueue CSS if it exists (depois do Tailwind para manter ordem correta)
 		if ( file_exists( $css_file_path ) ) {
 			wp_enqueue_style(
 				'evo-reels-frontend',
 				$css_url,
-				array(),
+				array( 'evo-reels-tailwind' ), // Dependência do Tailwind (se foi enfileirado)
 				EVO_REELS_VERSION
 			);
 		}

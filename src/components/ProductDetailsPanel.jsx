@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import '../index.css'; // Tailwind CSS compilado (sem CDN, sem vazamento global)
 import './ProductDetailsPanel.css';
 import { executeProductDetailsPanelJS } from '../utils/productDetailsPanelJS';
 
@@ -11,16 +12,9 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 	const scriptLoadedRef = useRef(false);
 
 	useEffect(() => {
-		// Load Tailwind CSS, Swiper CSS and JS
+		// Load Swiper CSS and JS (Tailwind já está compilado no CSS principal)
 		const loadDependencies = () => {
 			if (scriptLoadedRef.current) return;
-
-			// Load Tailwind CSS (if not already loaded)
-			if (!document.querySelector('script[src*="tailwindcss"]')) {
-				const tailwindScript = document.createElement('script');
-				tailwindScript.src = 'https://cdn.tailwindcss.com';
-				document.head.appendChild(tailwindScript);
-			}
 
 			// Load Swiper CSS
 			if (!document.querySelector('link[href*="swiper"]')) {
