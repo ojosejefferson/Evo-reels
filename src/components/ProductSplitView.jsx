@@ -86,25 +86,30 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 			onClick={(e) => {
 				// Don't stop propagation - let parent handle clicks outside content
 				// Only stop if clicking on actual content
-				if (e.target.closest('.swiper')) {
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container')) {
 					e.stopPropagation();
 				}
 			}}
 			onMouseDown={(e) => {
 				// Same logic for mousedown
-				if (e.target.closest('.swiper')) {
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container')) {
 					e.stopPropagation();
 				}
 			}}
 			onTouchStart={(e) => {
 				// Same logic for touch events
-				if (e.target.closest('.swiper')) {
+				if (e.target.closest('.swiper') || 
+					e.target.closest('#main-split-container')) {
 					e.stopPropagation();
 				}
 			}}
 		>
-			<div className="swiper evo-reels-vertical-swiper w-full h-screen md:h-[683px] relative overflow-hidden 
-						md:w-[384px] md:rounded-[36px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
+			<div id="main-split-container" className="w-full h-screen md:h-[683px] md:flex md:items-center md:justify-center 
+					md:w-[384px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+				<div className="swiper evo-reels-vertical-swiper w-full h-full relative overflow-hidden 
+							md:w-[384px] md:h-[683px] md:rounded-[36px] md:shadow-2xl md:shadow-black/70" id="evo-reels-vertical-swiper">
 				<div className="swiper-wrapper">
 					
 					<div className="swiper-slide evo-reels-reel-container w-full h-full relative" data-is-video="true">
@@ -253,6 +258,7 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 					</div>
 					
 				</div>
+			</div>
 			</div>
 			
 			<div className="modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal1">
