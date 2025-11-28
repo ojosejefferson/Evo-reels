@@ -129,7 +129,7 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 									<div className="loading-indicator absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity duration-300 z-10" id="loading-1" style={{
 										display: 'none', // Hidden by default, will show if video is not ready
 									}}>
-										<div className="spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
+										<div className="evo-reels-spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
 									</div>
 									
 									<video 
@@ -152,9 +152,9 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 									<div className="play-pause-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl opacity-0 transition-opacity duration-300 pointer-events-none z-10" id="evo-reels-play-pause-btn-1">Pause</div>
 								</div>
 								
-								<div className="swiper-slide slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1" className="w-full h-full object-cover" /></div>
-								<div className="swiper-slide slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2" className="w-full h-full object-cover" /></div>
-								<div className="swiper-slide slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3" className="w-full h-full object-cover" /></div>
+								<div className="swiper-slide evo-reels-slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 1" className="w-full h-full object-cover" /></div>
+								<div className="swiper-slide evo-reels-slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 2" className="w-full h-full object-cover" /></div>
+								<div className="swiper-slide evo-reels-slide-zoom cursor-crosshair relative"><img src="https://agweb.co.in/fashion-hub/images/white-top-with-jacket.jpeg" alt="Foto 3" className="w-full h-full object-cover" /></div>
 								
 							</div>
 							<div className="swiper-pagination"></div>
@@ -203,15 +203,15 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 						<div className="swiper evo-reels-horizontal-swiper w-full h-full relative" id="evo-reels-horizontal-swiper-2">
 							<div className="swiper-wrapper">
 								
-								<div className="swiper-slide slide-zoom cursor-crosshair relative">
+								<div className="swiper-slide evo-reels-slide-zoom cursor-crosshair relative">
 									<div className="loading-indicator absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity duration-300 z-10" id="loading-2">
-										<div className="spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
+										<div className="evo-reels-spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
 									</div>
 									<img src="https://images.unsplash.com/photo-1542291026-7eec264c27fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho 1" className="w-full h-full object-cover" />
 								</div>
-								<div className="swiper-slide slide-zoom cursor-crosshair relative">
+								<div className="swiper-slide evo-reels-slide-zoom cursor-crosshair relative">
 									<div className="loading-indicator absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity duration-300 z-10" id="loading-3">
-										<div className="spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
+										<div className="evo-reels-spinner border-4 border-gray-700 border-solid h-10 w-10 rounded-full"></div>
 									</div>
 									<img src="https://images.unsplash.com/photo-1605342415174-8d4ed0c5c364?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Tênis Vermelho 2" className="w-full h-full object-cover" />
 								</div>
@@ -261,7 +261,7 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 			</div>
 			</div>
 			
-			<div className="modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal1">
+			<div className="evo-reels-modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal1">
 				<div className="flex justify-between items-center pb-2">
 					<button 
 						className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" 
@@ -286,7 +286,7 @@ const ProductSplitView = ({ productsData = {}, onClose }) => {
 				<button className="buy-btn bg-black text-white border-none py-4 rounded-full text-lg font-bold w-full cursor-pointer">COMPRAR AGORA</button>
 			</div>
 
-			<div className="modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal2">
+			<div className="evo-reels-modal fixed bottom-[-100%] left-1/2 -translate-x-1/2 w-full max-w-[384px] max-h-[90vh] bg-white rounded-t-[32px] p-5 transition-all duration-400 ease-in-out shadow-xl z-[999] overflow-y-auto" id="modal2">
 				<div className="flex justify-between items-center pb-2">
 					<button 
 						className="back-btn bg-none border-none text-xl cursor-pointer p-2 font-bold" 

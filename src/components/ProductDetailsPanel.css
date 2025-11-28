@@ -1,26 +1,28 @@
-/* * CSS Customizado: Necessário para Spinner, Paginação, e Scrubber Handle */
-* { margin:0; padding:0; box-sizing:border-box; }
+/* ==================== EVO REELS PRODUCT DETAILS PANEL CSS ==================== */
+/* Todos os estilos são escopados para evitar conflitos com temas e plugins de terceiros */
 
-/* Estilos base para garantir 100% de altura/largura em dispositivos móveis */
-body, html { 
-  height: 100%; 
-  width: 100%;
-  background: #000; 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-  overflow: hidden; /* Mantém o overflow oculto para o feed vertical */
+/* Container principal - escopo para todos os estilos */
+.evo-reels-product-details-panel {
+  box-sizing: border-box;
 }
 
-/* * Spinner: O indicador de carregamento. */
-.spinner {
+.evo-reels-product-details-panel * {
+  box-sizing: border-box;
+}
+
+/* Spinner: O indicador de carregamento (escopado) */
+.evo-reels-product-details-panel .evo-reels-spinner {
   border-top-color: #fff;
-  -webkit-animation: spinner 1s linear infinite;
-  animation: spinner 1s linear infinite;
+  -webkit-animation: evo-reels-spinner 1s linear infinite;
+  animation: evo-reels-spinner 1s linear infinite;
 }
-@-webkit-keyframes spinner {
+
+@-webkit-keyframes evo-reels-spinner {
   0% { -webkit-transform: rotate(0deg); }
   100% { -webkit-transform: rotate(360deg); }
 }
-@keyframes spinner {
+
+@keyframes evo-reels-spinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
@@ -33,16 +35,18 @@ body, html {
   right: 20px;
   height: 10px; 
   background: transparent; 
-  z-index: 30; /* CORREÇÃO APLICADA: Aumentado para 30 para sobrepor o footer (z-20) */
+  z-index: 30;
   cursor: pointer;
   padding-top: 3.5px;
 }
+
 .evo-reels-progress-line {
   height: 3px; 
   background: rgba(255,255,255,0.3); 
   border-radius: 2px;
   position: relative;
 }
+
 .evo-reels-progress-fill {
   width: 0%; 
   height: 100%; 
@@ -50,51 +54,57 @@ body, html {
   border-radius: 2px;
   transition: width 0.1s linear;
 }
+
 .evo-reels-progress-handle {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translate(-50%, -50%);
-    width: 10px; 
-    height: 10px;
-    background: white;
-    border-radius: 50%;
-    opacity: 0; 
-    transition: opacity 0.1s;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 10px; 
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0; 
+  transition: opacity 0.1s;
 }
 
-/* Estilos de zoom de lupa (Desktop: Hover/Mousemove) */
-.slide-zoom img {
+/* Estilos de zoom de lupa (Desktop: Hover/Mousemove) - escopado */
+.evo-reels-product-details-panel .evo-reels-slide-zoom img {
   transition: transform 0.4s ease;
   transform-origin: center center;
 }
-.slide-zoom:hover img {
-    transform: scale(2.2);
+
+.evo-reels-product-details-panel .evo-reels-slide-zoom:hover img {
+  transform: scale(2.2);
 }
 
-/* ** Destaque e Z-INDEX da Paginação ** */
-.swiper-pagination-horizontal.swiper-pagination-bullets {
-    bottom: 140px; 
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: center;
-    gap: 9px;
-    z-index: 30; 
-    position: absolute;
+/* Paginação do Swiper - escopada dentro do container */
+.evo-reels-product-details-panel .swiper-pagination-horizontal.swiper-pagination-bullets {
+  bottom: 140px; 
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  z-index: 30; 
+  position: absolute;
 }
-.swiper-pagination-bullet {
-    width: 10px; 
-    height: 10px; 
-    background: rgba(255,255,255,0.5); 
-    opacity: 1;
-    transition: all 0.3s;
-}
-.swiper-pagination-bullet-active {
-    background: white; 
-    transform: scale(1.3); 
-    border: 1px solid rgba(0,0,0,0.2);
-}
-/* Estilo do modal customizado (mantido para classes modais) */
-.modal.bottom-0 { bottom: 0; }
 
+.evo-reels-product-details-panel .swiper-pagination-bullet {
+  width: 10px; 
+  height: 10px; 
+  background: rgba(255,255,255,0.5); 
+  opacity: 1;
+  transition: all 0.3s;
+}
+
+.evo-reels-product-details-panel .swiper-pagination-bullet-active {
+  background: white; 
+  transform: scale(1.3); 
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+/* Estilo do modal customizado - escopado */
+.evo-reels-product-details-panel .evo-reels-modal.bottom-0 { 
+  bottom: 0; 
+}

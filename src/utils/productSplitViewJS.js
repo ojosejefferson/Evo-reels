@@ -55,7 +55,7 @@ export const executeProductSplitViewJS = (productsData = {}) => {
 	}
 
 	// Ocultar spinners de imagem ao carregar
-	document.querySelectorAll('.slide-zoom img').forEach((img, index) => {
+	document.querySelectorAll('.evo-reels-slide-zoom img').forEach((img, index) => {
 		const loadingId = index + 2; 
 		img.addEventListener('load', () => hideLoading(loadingId));
 	});
@@ -134,7 +134,7 @@ export const executeProductSplitViewJS = (productsData = {}) => {
 					
 					// Resetar zoom na troca de slide horizontal
 					const prevSlide = this.slides[this.previousIndex];
-					if (prevSlide && prevSlide.classList.contains('slide-zoom') && 
+					if (prevSlide && prevSlide.classList.contains('evo-reels-slide-zoom') && 
 						(prevSlide.classList.contains('touch-zoom-active-fixed') || prevSlide.classList.contains('touch-zoom-active'))) {
 						resetZoom(prevSlide); // Desativa o zoom e reseta a escala
 					}
@@ -247,7 +247,7 @@ export const executeProductSplitViewJS = (productsData = {}) => {
 		img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
 	}
 
-	document.querySelectorAll('.slide-zoom').forEach(slide => {
+	document.querySelectorAll('.evo-reels-slide-zoom').forEach(slide => {
 		
 		slide.addEventListener('touchstart', (e) => {
 			if (window.innerWidth >= 450) return; 
