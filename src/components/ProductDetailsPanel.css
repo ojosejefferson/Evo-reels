@@ -108,3 +108,13 @@
 .evo-reels-product-details-panel .evo-reels-modal.bottom-0 { 
   bottom: 0; 
 }
+
+/* ProductDetailsPanel.css: Reativa a interação para o mobile */
+
+@media (max-width: 767px) {
+  .evo-reels-product-details-panel .footer,
+  .evo-reels-product-details-panel .footer * {
+    /* Força a reativação dos cliques/toques para que o onClick funcione */
+    pointer-events: auto !important; 
+  }
+}
