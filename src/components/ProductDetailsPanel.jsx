@@ -372,7 +372,7 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 							<>
 								<h2 className="text-3xl font-bold mb-4">{activeProduct.title}</h2>
 								<div className="text-4xl font-extrabold mb-6 text-green-600">{activeProduct.price}</div>
-								<div className="text-gray-700 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: activeProduct.description }} />
+								<div className="text-gray-700 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: activeProduct.fullDescription || activeProduct.description }} />
 
 								<button className="w-full py-4 bg-indigo-600 text-white font-bold rounded-full text-lg hover:bg-indigo-700 transition mb-6">
 									ADICIONAR AO CARRINHO

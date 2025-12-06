@@ -104,7 +104,16 @@ class Evo_Reels_Frontend {
 				$product = wc_get_product( $post_id );
 				if ( $product ) {
 					$title = $product->get_name();
-					$description = $product->get_short_description() ?: $product->get_description();
+					$title = $product->get_name();
+					// Get both descriptions
+					$short_description = $product->get_short_description();
+					$full_description = $product->get_description();
+					
+					// Use short description as default, fallback to full if empty
+					$description = $short_description ?: $full_description;
+					
+					// Ensure full description is available (fallback to short if full is somehow empty)
+					$full_description_final = $full_description ?: $short_description;
 					
 					// Get price
 					$price_raw = $product->get_price();
@@ -171,6 +180,7 @@ class Evo_Reels_Frontend {
 					'title'       => $title,
 					'price'       => $price,
 					'description' => $description,
+					'fullDescription' => $full_description_final,
 					'video'       => esc_url( $video_url ), // Use 'video' key as preferred by JS
 					'videoUrl'    => esc_url( $video_url ), // Keep for compat
 					'images'      => $images,
