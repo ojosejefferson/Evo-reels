@@ -5,7 +5,7 @@ import './ProductDetailsPanel.css';
 
 const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 	const [activeModal, setActiveModal] = useState(null); // null, 1, or 2
-	const [isMuted, setIsMuted] = useState(true);
+	const [isMuted, setIsMuted] = useState(false);
 	const [activeProduct, setActiveProduct] = useState(null);
 	const [swiperLoaded, setSwiperLoaded] = useState(false);
 
