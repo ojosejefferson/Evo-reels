@@ -106,7 +106,6 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 		};
 	}, [swiperLoaded, productsData, hasProduct2]); // Re-init if data changes significantly
 
-	// Video Progress Logic
 	useEffect(() => {
 		const video = videoRef.current;
 		if (!video) return;
@@ -122,15 +121,19 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 		video.addEventListener('timeupdate', updateProgress);
 		video.addEventListener('loadedmetadata', updateProgress);
 
-		// Auto play if it's the first product active
-		if (activeProduct && activeProduct.id === 1) {
-			video.play().catch(() => { });
+		// Auto play if it's the first product active (compare IDs correctly)
+		// We use loose comparison or ensure we compare against the correct data source
+		if (activeProduct && productsData['1'] && activeProduct.id === productsData['1'].id) {
+			// Small delay to ensure DOM is ready and interaction is acknowledged
+			setTimeout(() => {
+				video.play().catch((e) => console.log('Auto-play blocked:', e));
+			}, 100);
 		}
 
 		return () => {
 			video.removeEventListener('timeupdate', updateProgress);
 		};
-	}, [activeProduct]);
+	}, [activeProduct, productsData]);
 
 	const handleSeek = (e) => {
 		const video = videoRef.current;
@@ -167,7 +170,15 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 				document.body
 			)}
 
-			<div className="evo-reels-product-details-panel fixed inset-0 z-[9999] overflow-hidden">
+			<div
+				className="evo-reels-product-details-panel fixed inset-0 z-[9999] overflow-hidden"
+				onClick={(e) => {
+					// Close modal when clicking on the background (outside the content)
+					if (e.target === e.currentTarget) {
+						onClose();
+					}
+				}}
+			>
 
 				{/* Main Split Container */}
 				<div id="main-split-container" className="w-full h-screen md:h-[683px] md:w-[784px] md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:flex md:shadow-2xl">
