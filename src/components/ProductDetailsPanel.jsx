@@ -258,8 +258,8 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 									}}
 								>
 									<div className="profile flex items-center gap-2 mb-1">
-										{/* Placeholder for profile image if not available in data */}
-										<img src="https://agweb.co.in/images/portfolio/favicon/apple-icon-60x60.png" alt="Profile" className="w-9 h-9 rounded-full border-2 border-white" />
+										{/* Product Thumbnail */}
+										<img src={images1[0] || "https://agweb.co.in/images/portfolio/favicon/apple-icon-60x60.png"} alt="Profile" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
 										<div>
 											<div className="product-name font-bold text-base">{product1.title}</div>
 											<div className="product-price text-sm font-semibold text-green-400">{product1.price}</div>
@@ -315,7 +315,7 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 										}}
 									>
 										<div className="profile flex items-center gap-2 mb-1">
-											<img src="https://agweb.co.in/images/portfolio/favicon/apple-icon-60x60.png" alt="Profile" className="w-9 h-9 rounded-full border-2 border-white" />
+											<img src={images2[0] || "https://agweb.co.in/images/portfolio/favicon/apple-icon-60x60.png"} alt="Profile" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
 											<div>
 												<div className="product-name font-bold text-base">{product2.title}</div>
 												<div className="product-price text-sm font-semibold text-green-400">{product2.price}</div>
