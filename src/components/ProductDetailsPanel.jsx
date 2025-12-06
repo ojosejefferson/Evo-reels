@@ -79,7 +79,10 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						const video = videoRef.current;
 						if (video) {
 							if (activeIndex === 0) {
-								video.play().catch(() => { });
+								// Only play if horizontal swiper is also on the video slide (index 0)
+								if (!horizontalSwiper1Ref.current || horizontalSwiper1Ref.current.activeIndex === 0) {
+									video.play().catch(() => { });
+								}
 							} else {
 								video.pause();
 							}
@@ -91,10 +94,33 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 
 		// Horizontal Swipers
 		document.querySelectorAll('.evo-reels-horizontal-swiper').forEach((el, index) => {
-			const swiperInstance = new window.Swiper(el, {
+			const config = {
 				slidesPerView: 1,
 				pagination: { el: '.swiper-pagination', clickable: true },
-			});
+			};
+
+			// Special handling for the first horizontal swiper (Product 1 with Video)
+			if (index === 0) {
+				config.on = {
+					slideChange: function () {
+						const video = videoRef.current;
+						if (video) {
+							// If we are on the first slide (index 0), play video. Otherwise pause.
+							// But only if Vertical Swiper is also on Product 1 (index 0)
+							const isVerticalOnProduct1 = !verticalSwiperRef.current || verticalSwiperRef.current.activeIndex === 0;
+
+							if (this.activeIndex === 0 && isVerticalOnProduct1) {
+								video.play().catch(() => { });
+							} else {
+								video.pause();
+							}
+						}
+					}
+				};
+			}
+
+			const swiperInstance = new window.Swiper(el, config);
+
 			if (index === 0) horizontalSwiper1Ref.current = swiperInstance;
 			if (index === 1) horizontalSwiper2Ref.current = swiperInstance;
 		});
@@ -126,7 +152,10 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 		if (activeProduct && productsData['1'] && activeProduct.id === productsData['1'].id) {
 			// Small delay to ensure DOM is ready and interaction is acknowledged
 			setTimeout(() => {
-				video.play().catch((e) => console.log('Auto-play blocked:', e));
+				// Checks if horizontal swiper is on index 0 (Video)
+				if (!horizontalSwiper1Ref.current || horizontalSwiper1Ref.current.activeIndex === 0) {
+					video.play().catch((e) => console.log('Auto-play blocked:', e));
+				}
 			}, 100);
 		}
 
