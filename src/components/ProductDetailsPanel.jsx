@@ -398,7 +398,7 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						{images1[0] && <img src={images1[0]} className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Produto" />}
 						<h3 className="modal-title text-2xl font-bold mb-2">{product1.title}</h3>
 						<div className="modal-price text-3xl font-extrabold mb-3">{product1.price}</div>
-						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product1.description }} />
+						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product1.fullDescription || product1.description }} />
 						<button className="buy-btn bg-black text-white border-none py-4 rounded-full text-lg font-bold w-full cursor-pointer">COMPRAR AGORA</button>
 					</div>,
 					document.body
@@ -414,7 +414,7 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						{images2[0] && <img src={images2[0]} className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Produto" />}
 						<h3 className="modal-title text-2xl font-bold mb-2">{product2.title}</h3>
 						<div className="modal-price text-3xl font-extrabold mb-3">{product2.price}</div>
-						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product2.description }} />
+						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product2.fullDescription || product2.description }} />
 						<button className="buy-btn bg-black text-white border-none py-4 rounded-full text-lg font-bold w-full cursor-pointer">COMPRAR AGORA</button>
 					</div>,
 					document.body
