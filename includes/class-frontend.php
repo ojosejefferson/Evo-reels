@@ -95,8 +95,10 @@ class Evo_Reels_Frontend {
 			$title = get_the_title( $post_id );
 			$description = '';
 			$price = '';
-			$price_formatted = '';
-
+			$images = array();
+			$stock = '';
+			$shipping = '';
+			
 			// Try to get WooCommerce product data
 			if ( class_exists( 'WooCommerce' ) && 'product' === get_post_type( $post_id ) ) {
 				$product = wc_get_product( $post_id );
@@ -104,43 +106,79 @@ class Evo_Reels_Frontend {
 					$title = $product->get_name();
 					$description = $product->get_short_description() ?: $product->get_description();
 					
-					// Get price using WooCommerce function - returns clean formatted price
+					// Get price
 					$price_raw = $product->get_price();
 					if ( $price_raw ) {
-						// For sale prices, show sale price and regular price
 						if ( $product->is_on_sale() ) {
 							$regular_price = $product->get_regular_price();
 							$sale_price = $product->get_sale_price();
 							if ( $regular_price && $sale_price ) {
-								// Format: "R$ 99,90 R$ 149,90" (sale price first, then regular)
 								$sale_formatted = html_entity_decode( wp_strip_all_tags( wc_price( $sale_price ) ), ENT_QUOTES, 'UTF-8' );
 								$regular_formatted = html_entity_decode( wp_strip_all_tags( wc_price( $regular_price ) ), ENT_QUOTES, 'UTF-8' );
 								$price = $sale_formatted . ' ' . $regular_formatted;
 							} else {
-								// Fallback to current price
 								$price = html_entity_decode( wp_strip_all_tags( wc_price( $price_raw ) ), ENT_QUOTES, 'UTF-8' );
 							}
 						} else {
-							// Regular price - use wc_price() to format correctly, then decode HTML entities
 							$price = html_entity_decode( wp_strip_all_tags( wc_price( $price_raw ) ), ENT_QUOTES, 'UTF-8' );
 						}
 					} else {
-						// Free product
 						$price = __( 'Grátis', 'evo-reels' );
+					}
+
+					// Get Stock Status
+					if ( $product->is_in_stock() ) {
+						$stock = __( 'Em estoque', 'evo-reels' );
+						$stock_qty = $product->get_stock_quantity();
+						if ( $stock_qty ) {
+							$stock .= ' (' . $stock_qty . ')';
+						}
+					} else {
+						$stock = __( 'Fora de estoque', 'evo-reels' );
+					}
+
+					// Get Images
+					$image_id = $product->get_image_id();
+					if ( $image_id ) {
+						$image_url = wp_get_attachment_image_url( $image_id, 'large' );
+						if ( $image_url ) {
+							$images[] = $image_url;
+						}
+					}
+
+					// Gallery Images
+					$attachment_ids = $product->get_gallery_image_ids();
+					if ( $attachment_ids ) {
+						foreach ( $attachment_ids as $attachment_id ) {
+							$image_url = wp_get_attachment_image_url( $attachment_id, 'large' );
+							if ( $image_url ) {
+								$images[] = $image_url;
+							}
+						}
 					}
 				}
 			} else {
-				// For posts/pages, get excerpt or content
+				// For posts/pages
 				$description = get_the_excerpt( $post_id ) ?: wp_trim_words( get_the_content( $post_id ), 30 );
+				if ( has_post_thumbnail( $post_id ) ) {
+					$images[] = get_the_post_thumbnail_url( $post_id, 'large' );
+				}
 			}
 
 			$product_data = array(
 				'1' => array(
+					'id'          => $post_id,
 					'title'       => $title,
-					'price'       => $price, // Clean text version (no HTML)
+					'price'       => $price,
 					'description' => $description,
-					'videoUrl'    => esc_url( $video_url ),
+					'video'       => esc_url( $video_url ), // Use 'video' key as preferred by JS
+					'videoUrl'    => esc_url( $video_url ), // Keep for compat
+					'images'      => $images,
+					'stock'       => $stock,
+					'shipping'    => $shipping,
 				),
+				// We currently only support single product context per page in standard mode
+				// '2' could be added if we support up-sells/cross-sells in the future
 			);
 		}
 
