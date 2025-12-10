@@ -371,7 +371,22 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						{activeProduct && (
 							<>
 								<h2 className="text-3xl font-bold mb-4">{activeProduct.title}</h2>
+
 								<div className="text-4xl font-extrabold mb-6 text-green-600">{activeProduct.price}</div>
+
+								{/* Action Buttons Row */}
+								<div className="flex items-center gap-3 mb-6">
+									<button className="flex-1 bg-black text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-sm uppercase tracking-wide">
+										Comprar Agora
+									</button>
+									<button className="flex-1 bg-white text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-gray-50 transition text-sm uppercase tracking-wide">
+										Adicionar
+									</button>
+									<div className="relative w-12 h-12 flex items-center justify-center bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200 transition">
+										<span className="text-2xl">🛒</span>
+										<span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">1</span>
+									</div>
+								</div>
 								<div className="text-gray-700 leading-relaxed mb-8" dangerouslySetInnerHTML={{ __html: activeProduct.fullDescription || activeProduct.description }} />
 
 								<button className="w-full py-4 bg-indigo-600 text-white font-bold rounded-full text-lg hover:bg-indigo-700 transition mb-6">
@@ -397,7 +412,22 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						<div className="drag-bar w-10 h-1.5 bg-gray-300 rounded-md mx-auto my-2"></div>
 						{images1[0] && <img src={images1[0]} className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Produto" />}
 						<h3 className="modal-title text-2xl font-bold mb-2">{product1.title}</h3>
+
 						<div className="modal-price text-3xl font-extrabold mb-3">{product1.price}</div>
+
+						{/* Action Buttons Row */}
+						<div className="flex items-center gap-2 mb-4">
+							<button className="flex-1 bg-black text-white font-bold py-3 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs uppercase tracking-wide">
+								Comprar Agora
+							</button>
+							<button className="flex-1 bg-white text-black font-bold py-3 px-2 rounded-xl border-2 border-black hover:bg-gray-50 transition text-xs uppercase tracking-wide">
+								Adicionar
+							</button>
+							<div className="relative w-11 h-11 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200 transition">
+								<span className="text-xl">🛒</span>
+								<span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">1</span>
+							</div>
+						</div>
 						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product1.fullDescription || product1.description }} />
 						<button className="buy-btn bg-black text-white border-none py-4 rounded-full text-lg font-bold w-full cursor-pointer">COMPRAR AGORA</button>
 					</div>,
@@ -413,7 +443,22 @@ const ProductDetailsPanel = ({ productsData = {}, onClose }) => {
 						<div className="drag-bar w-10 h-1.5 bg-gray-300 rounded-md mx-auto my-2"></div>
 						{images2[0] && <img src={images2[0]} className="modal-img w-full h-[340px] object-cover rounded-xl mb-4" alt="Produto" />}
 						<h3 className="modal-title text-2xl font-bold mb-2">{product2.title}</h3>
+
 						<div className="modal-price text-3xl font-extrabold mb-3">{product2.price}</div>
+
+						{/* Action Buttons Row */}
+						<div className="flex items-center gap-2 mb-4">
+							<button className="flex-1 bg-black text-white font-bold py-3 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs uppercase tracking-wide">
+								Comprar Agora
+							</button>
+							<button className="flex-1 bg-white text-black font-bold py-3 px-2 rounded-xl border-2 border-black hover:bg-gray-50 transition text-xs uppercase tracking-wide">
+								Adicionar
+							</button>
+							<div className="relative w-11 h-11 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200 transition">
+								<span className="text-xl">🛒</span>
+								<span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">1</span>
+							</div>
+						</div>
 						<div className="modal-desc text-base leading-relaxed text-gray-600 mb-8" dangerouslySetInnerHTML={{ __html: product2.fullDescription || product2.description }} />
 						<button className="buy-btn bg-black text-white border-none py-4 rounded-full text-lg font-bold w-full cursor-pointer">COMPRAR AGORA</button>
 					</div>,
